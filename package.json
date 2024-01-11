@@ -1,0 +1,13 @@
+{
+  "name": "budgie_web",
+  "version": "1.0.0",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "drawflow": "^0.0.59",
+    "express": "^4.18.2",
+    "lit-element": "^4.0.2",
+    "socket.io": "^4.7.3",
+    "socket.io-client": "^4.7.3",
+    "ws": "^8.16.0"
+  }
+}

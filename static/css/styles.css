@@ -1,0 +1,120 @@
+/* styles.css */
+
+/* Set fixed height for the page */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+/* Set height for the container */
+.container-fluid {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Set ratio for the columns */
+.row {
+    flex: 1;
+}
+
+/* Set column width ratios */
+.col-menu, .col-messaging, .col-empty {
+    border: 1px solid #ccc;
+    overflow-y: auto;
+}
+
+.col-menu {
+    flex: 1;
+    background-color: #000;
+    color: #fff;
+    padding: 10px;
+}
+
+.navbar-nav .nav-link {
+    padding-right: 5px;
+    padding-left: 5px;
+}
+
+.col-menu .navbar {
+    width: 100%; /* Make the navbar fill the whole width of the column */
+}
+
+.col-menu .navbar-nav {
+    width: 100%; /* Stretch the navbar-nav to fill the whole width */
+    display: flex;
+    flex-direction: column; /* Arrange the items vertically */
+}
+
+.col-menu .navbar-nav .nav-item {
+    /*padding: 5px; !* Reduced padding for closer items *!*/
+    width: 100%; /* Stretch the nav-item to fill the whole width */
+    text-align: left; /* Align text to the left within the nav-item */
+}
+
+.col-menu .navbar-nav .nav-link {
+    color: #fff;
+}
+
+.col-menu .navbar-nav .nav-link:hover {
+    color: #fff;
+    background-color: #252525; /* Gray background on hover */
+    border-radius: 5px; /* Rounded corners on hover */
+}
+
+.col-messaging {
+    flex: 4;
+    height: 100vh;
+}
+
+.col-empty {
+    flex: 1;
+    height: 100vh;
+}
+
+/* Set messaging interface styling */
+.message-box {
+    border: 1px solid #ccc;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding: 10px;
+    height: calc(100% - 60px); /* Adjusted height, considering input box and button */
+}
+
+.input-group {
+    margin-top: 10px;
+}
+
+.send-message-input {
+    width: calc(100% - 40px);
+}
+
+.send-message-button {
+    width: 40px;
+    cursor: pointer;
+}
+
+.agent {
+    text-decoration: underline;
+}
+
+/* Style for timestamp */
+.timestamp {
+    font-size: 10px;
+    color: #888;
+}
+
+.progress-bar-fill {
+    display: block;
+    height: 5px;
+    background: #659cef;
+    border-radius: 3px;
+    /*transition: width 250ms ease-in-out;*/
+    /*transition: width 5s ease-in-out;*/
+}
+
+.wrapper {
+  width: 100%;
+  height: calc(100vh - 67px);
+  display: flex;
+}
