@@ -1,6 +1,8 @@
-const socket = io('http://localhost:3000');
 
-const url = 'http://localhost:5000/send-message';
+
+const socket = io(BUDGIE_WEB_SOCKET_HOST + ':' + BUDGIE_WEB_SOCKET_PORT);
+
+const url = DIALOGUE_SYSTEM_HOST + ':' + DIALOGUE_SYSTEM_HOST + '/send-message';
 
 // Define a queue to hold the asynchronous functions
 const progressBarQueue = [];

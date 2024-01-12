@@ -6,23 +6,24 @@ const socketIO = require('socket.io');
 const ioClient = require('socket.io-client');
 const cors = require('cors');
 
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server, {
     cors: {
-        origin: "http://127.0.0.1:8000", // Update to match the URL of your Django app
+        origin: BUDGIE_WEB_HOST + ":" + BUDGIE_WEB_PORT, // Update to match the URL of your Django app
         methods: ["GET", "POST"]
     }
 });
 
 // Use CORS
 app.use(cors({
-    origin: 'http://127.0.0.1:8000', // Update to match the URL of your Django app
+    origin: BUDGIE_WEB_HOST + ":" + BUDGIE_WEB_PORT, // Update to match the URL of your Django app
     credentials: true
 }));
 
 // Connect to Flask Socket.IO server
-const flaskSocket = ioClient.connect('http://localhost:5000');
+const flaskSocket = ioClient.connect(DIALOGUE_SYSTEM_HOST + ":" + DIALOGUE_SYSTEM_PORT);
 
 flaskSocket.on('stream_message', (data) => {
     console.log('Received message from Flask:', data);
@@ -36,6 +37,6 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(3000, () => {
+server.listen(BUDGIE_WEB_SOCKET_PORT, () => {
     console.log('Listening on port 3000');
 });

@@ -1,6 +1,9 @@
 {
   "name": "budgie_web",
   "version": "1.0.0",
+    "scripts": {
+    "start": "node static/js/server.js"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "drawflow": "^0.0.59",
