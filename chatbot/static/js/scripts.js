@@ -64,7 +64,7 @@ $(document).ready(function () {
         // Get current time
         var currentTime = new Date().toLocaleTimeString();
 
-        // console.log(data);
+        console.log(data);
         if (data.ds_action === 'REQUEST_USER_CHOOSE_MENU_OPTION') {
             // Check if there are options in the response
             if (data.message && data.message.length > 0) {
@@ -105,7 +105,7 @@ $(document).ready(function () {
         }
          else if (data.ds_action === 'LOG_ACTION_FAILED') {
             let message = data.message.replace('failed', `<span class="text-danger">failed</span>`)
-            let reason = data.reason.replaceAll('\\n', `</br>`)
+            let reason = data.reason.replaceAll('\n', `</br>`)
 
             actionHistory.innerHTML += `
                         <div class="agent">${data.ds_action_by}</div>
@@ -115,6 +115,15 @@ $(document).ready(function () {
                         <hr>
             `;
             actionHistory.scrollTop = actionHistory.scrollHeight;
+        } else if (data.ds_action === 'DISPLAY_LOG') {
+            let message = data.message.replaceAll('\n', `</br>`)
+            actionHistory.innerHTML += `
+                        <div class="agent">${data.ds_action_by}</div>
+                        <div>${message}</div>
+                        <div class="timestamp">${currentTime}</div>
+                        <hr>
+            `;
+        actionHistory.scrollTop = actionHistory.scrollHeight;
         } else {
             // Add message to the message box
             messageBox.innerHTML += `

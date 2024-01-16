@@ -1,8 +1,6 @@
+const socket = io('http://localhost:3000');
 
-
-const socket = io(BUDGIE_WEB_SOCKET_HOST + ':' + BUDGIE_WEB_SOCKET_PORT);
-
-const url = DIALOGUE_SYSTEM_HOST + ':' + DIALOGUE_SYSTEM_HOST + '/send-message';
+const url = 'http://localhost:5000/send-message';
 
 // Define a queue to hold the asynchronous functions
 const progressBarQueue = [];
@@ -15,7 +13,7 @@ $(document).ready(function () {
                 const progressBar = $('#' + progressbarId[0]);
                 const duration = progressbarId[1]; // duration is in seconds, intervalUpdateFrequency is in ms
                 const updateRate = (100 / (duration * 1000)) * intervalUpdateFrequency;
-                console.log(updateRate);
+                // console.log(updateRate);
                 let widthInPercent = progressBar.width() / progressBar.parent().width() * 100;
                 if (widthInPercent < 100) {
                     progressBar.css('width', widthInPercent + updateRate + '%');
@@ -53,7 +51,7 @@ $(document).ready(function () {
     })
         .then(response => response.json())
         .then(data => {
-            console.log('Response from server:', data);
+            // console.log('Response from server:', data);
         })
         .catch(error => {
             console.error('Error sending message:', error);
@@ -66,7 +64,7 @@ $(document).ready(function () {
         // Get current time
         var currentTime = new Date().toLocaleTimeString();
 
-        console.log(data);
+        // console.log(data);
         if (data.ds_action === 'REQUEST_USER_CHOOSE_MENU_OPTION') {
             // Check if there are options in the response
             if (data.message && data.message.length > 0) {
@@ -96,13 +94,36 @@ $(document).ready(function () {
             // fillProgressBar(ldProgress, 2);
             actionHistory.scrollTop = actionHistory.scrollHeight;
         } else if (data.ds_action === 'LOG_ACTION_COMPLETED') {
+            let message = data.message.replace('completed', `<span class="text-success">completed</span>`)
             actionHistory.innerHTML += `
                         <div class="agent">${data.ds_action_by}</div>
-                        <div>${data.message}</div>
+                        <div>${message}</div>
                         <div class="timestamp">${currentTime}</div>
                         <hr>
             `;
             actionHistory.scrollTop = actionHistory.scrollHeight;
+        }
+         else if (data.ds_action === 'LOG_ACTION_FAILED') {
+            let message = data.message.replace('failed', `<span class="text-danger">failed</span>`)
+            let reason = data.reason.replaceAll('\\n', `</br>`)
+
+            actionHistory.innerHTML += `
+                        <div class="agent">${data.ds_action_by}</div>
+                        <div>${message}</div>
+                        <div>${reason}</div>
+                        <div class="timestamp">${currentTime}</div>
+                        <hr>
+            `;
+            actionHistory.scrollTop = actionHistory.scrollHeight;
+        } else if (data.ds_action === 'DISPLAY_LOG') {
+
+        actionHistory.innerHTML += `
+                    <div class="agent">${data.ds_action_by}</div>
+                    <div>${data.message}</div>
+                    <div class="timestamp">${currentTime}</div>
+                    <hr>
+        `;
+        actionHistory.scrollTop = actionHistory.scrollHeight;
         } else {
             // Add message to the message box
             messageBox.innerHTML += `
@@ -205,7 +226,7 @@ function selectOption(selectedOption, ds_action) {
     })
         .then(response => response.json())
         .then(data => {
-            console.log('Response from server:', data);
+            // console.log('Response from server:', data);
         })
         .catch(error => {
             console.error('Error sending message:', error);
