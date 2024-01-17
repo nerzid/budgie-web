@@ -67,6 +67,11 @@ html, body {
     height: 100vh;
 }
 
+.col-full-vh {
+    flex: 4;
+    height: 100vh;
+}
+
 .col-empty {
     flex: 1;
     height: 100vh;
@@ -117,4 +122,17 @@ html, body {
   width: 100%;
   height: calc(100vh - 67px);
   display: flex;
+}
+
+.message-box-wrapper {
+  width: 100%;
+  height: calc(100vh - 50px);
+  display: flex;
+    flex-direction: column;
+}
+
+.fill-height {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
