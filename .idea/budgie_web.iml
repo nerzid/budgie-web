@@ -19,11 +19,15 @@
     <orderEntry type="jdk" jdkName="Python 3.9 (budgie_web)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PyDocumentationSettings">
+    <option name="format" value="PLAIN" />
+    <option name="myDocStringFormat" value="Plain" />
+  </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
     <option name="TEMPLATE_FOLDERS">
       <list>
-        <option value="$MODULE_DIR$/../budgie_gui\templates" />
+        <option value="$MODULE_DIR$/chatbot/templates" />
       </list>
     </option>
   </component>

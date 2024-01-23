@@ -16,6 +16,10 @@ const url = DIALOGUE_SYSTEM_HOST + ':' + DIALOGUE_SYSTEM_PORT + '/send-message';
 const progressBarQueue = [];
 const intervalUpdateFrequency = 1000;
 
+let session_id = -1
+let sender_agent_id = -1
+let receiver_agent_id = -1
+
 $(document).ready(function () {
     function processQueue() {
         if (progressBarQueue.length > 0) {
@@ -73,9 +77,14 @@ $(document).ready(function () {
         const actionHistory = document.getElementById('action-history')
         // Get current time
         var currentTime = new Date().toLocaleTimeString();
+        let message = processText(data.message);
+        console.log(data);
 
-        // console.log(data);
-        if (data.ds_action === 'REQUEST_USER_CHOOSE_MENU_OPTION') {
+        if (data.ds_action === 'DIALOGUE_STARTED') {
+            session_id = data.session_id;
+            sender_agent_id = data.sender_agent_id
+            receiver_agent_id = data.receiver_agent_id
+        } else if (data.ds_action === 'REQUEST_USER_CHOOSE_MENU_OPTION') {
             // Check if there are options in the response
             if (data.message && data.message.length > 0) {
                 // Display options as buttons
@@ -104,7 +113,7 @@ $(document).ready(function () {
             // fillProgressBar(ldProgress, 2);
             actionHistory.scrollTop = actionHistory.scrollHeight;
         } else if (data.ds_action === 'LOG_ACTION_COMPLETED') {
-            let message = data.message.replace('completed', `<span class="text-success">completed</span>`)
+
             actionHistory.innerHTML += `
                         <div class="agent">${data.ds_action_by}</div>
                         <div>${message}</div>
@@ -113,9 +122,7 @@ $(document).ready(function () {
             `;
             actionHistory.scrollTop = actionHistory.scrollHeight;
         } else if (data.ds_action === 'LOG_ACTION_FAILED') {
-            let message = data.message.replace('failed', `<span class="text-danger">failed</span>`)
-            let reason = data.reason.replaceAll('\\n', `</br>`)
-
+            let reason = processText(data.reason);
             actionHistory.innerHTML += `
                         <div class="agent">${data.ds_action_by}</div>
                         <div>${message}</div>
@@ -125,7 +132,6 @@ $(document).ready(function () {
             `;
             actionHistory.scrollTop = actionHistory.scrollHeight;
         } else if (data.ds_action === 'DISPLAY_LOG') {
-            let message = data.message.replaceAll('\\n', `</br>`)
             actionHistory.innerHTML += `
                     <div class="agent">${data.ds_action_by}</div>
                     <div>${message}</div>
@@ -137,7 +143,7 @@ $(document).ready(function () {
             // Add message to the message box
             messageBox.innerHTML += `
                 <div class="agent">${data.ds_action_by}</div>
-                <div>${data.message}</div>
+                <div>${message}</div>
                 <div class="timestamp">${currentTime}</div>
                 <hr>
             `;
@@ -146,6 +152,14 @@ $(document).ready(function () {
     });
 
 });
+
+function processText(text) {
+    // /abc/g is a regex which basically does replaceAll(abc, def)
+    text = text.toString().replaceAll('\n', `</br>`)
+        .replaceAll('failed', `<span class="text-danger">failed</span>`)
+        .replaceAll('completed', `<span class="text-success">completed</span>`);
+    return text
+}
 
 function sendMessage() {
     var messageInput = document.getElementById('sendMessageInput');
@@ -222,6 +236,9 @@ function selectOption(selectedOption, ds_action) {
         'ds_action_by': 'Joe(patient)',
         'message': selectedOption,
         'ds_action': ds_action,
+        'session_id': session_id,
+        'sender_agent_id': sender_agent_id,
+        'receiver_agent_id': receiver_agent_id
     };
     $('#select-menu-option').remove();
     fetch(url, {
