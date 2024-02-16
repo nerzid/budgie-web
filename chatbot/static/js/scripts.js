@@ -1,5 +1,5 @@
 // const settings = window.MySettings;
-//
+
 const {
     DIALOGUE_SYSTEM_HOST,
     DIALOGUE_SYSTEM_PORT,
@@ -19,6 +19,12 @@ const intervalUpdateFrequency = 1000;
 let session_id = -1
 let sender_agent_id = -1
 let receiver_agent_id = -1
+
+var id = document.getElementById("drawflow");
+const editor = new Drawflow(id);
+editor.reroute = true;
+editor.editor_mode = 'edit';
+editor.start();
 
 $(document).ready(function () {
     function processQueue() {
@@ -139,6 +145,8 @@ $(document).ready(function () {
                     <hr>
         `;
             actionHistory.scrollTop = actionHistory.scrollHeight;
+        } else if (data.ds_action === 'SESSIONS_INFO') {
+            updateSessionsInfo(data.message)
         } else {
             // Add message to the message box
             messageBox.innerHTML += `
@@ -153,11 +161,98 @@ $(document).ready(function () {
 
 });
 
+function updateSessionsInfo(message) {
+    if (editor) {
+        editor.clear();
+    }
+    // editor.clear();
+    // editor.reroute = true;
+    // editor.editor_mode = 'view';
+    // editor.start();
+    let pos_x = 0;
+    let pos_y = 0;
+    let pos_x_space = 500;
+    let session_ix = 0;
+    message.forEach(session => {
+        let start_conditions_str = `<ul>`;
+        session.start_conditions.forEach(start_condition => {
+            start_conditions_str += `<li>(${start_condition.status}) ${start_condition.condition}</li>`;
+        });
+        start_conditions_str += `</ul>`;
+
+        let expectations_str = `<ul>`;
+        session.expectations.forEach(expectation => {
+           expectations_str += `<li>(${expectation.status}) ${expectation.expectation}</li>`
+        });
+        expectations_str += `</ul>`;
+
+        let end_goals_str = `<ul>`;
+        session.end_goals.forEach(end_goal => {
+            end_goals_str += `<li>(${end_goal.status}) ${end_goal.end_goal}</li>`
+        });
+        end_goals_str += `</ul>`;
+        let html = `
+        <div>
+          <div class="title-box">${session.name} (${session.status})</div>
+          <div class="box">
+            <div class="accordion" id="accordionExample">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne${session_ix}" aria-expanded="true" aria-controls="collapseOne">
+                    Starting Conditions
+                  </button>
+                </h2>
+                <div id="collapseOne${session_ix}" class="accordion-collapse collapse show" aria-labelledby="headingOne">
+                  <div class="accordion-body">
+                    ${start_conditions_str}
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo${session_ix}" aria-expanded="false" aria-controls="collapseTwo">
+                    Expectations
+                  </button>
+                </h2>
+                <div id="collapseTwo${session_ix}" class="accordion-collapse collapse" aria-labelledby="headingTwo">
+                  <div class="accordion-body">
+                    ${expectations_str}
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                  <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree${session_ix}" aria-expanded="false" aria-controls="collapseThree">
+                    End Goals
+                  </button>
+                </h2>
+                <div id="collapseThree${session_ix}" class="accordion-collapse collapse" aria-labelledby="headingThree">
+                  <div class="accordion-body">
+                    ${end_goals_str}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        `;
+        let data = {};
+        editor.addNode(`session${session_ix}`, 1, 1, pos_x + (pos_x_space * session_ix), pos_y, 'github', data, html);
+        session_ix += 1;
+    })
+    for (let i = session_ix; i > 0; i--){
+        editor.addConnection(`session${i}`, `session${i-1}`, 'output_1', 'input_1');
+    }
+
+}
+
 function processText(text) {
-    // /abc/g is a regex which basically does replaceAll(abc, def)
-    text = text.toString().replaceAll('\n', `</br>`)
-        .replaceAll('failed', `<span class="text-danger">failed</span>`)
-        .replaceAll('completed', `<span class="text-success">completed</span>`);
+    if (typeof text === 'string' || text instanceof String) {
+        // /abc/g is a regex which basically does replaceAll(abc, def)
+        text = text.toString().replaceAll('\n', `</br>`)
+            .replaceAll('failed', `<span class="text-danger">failed</span>`)
+            .replaceAll('completed', `<span class="text-success">completed</span>`);
+    }
     return text
 }
 

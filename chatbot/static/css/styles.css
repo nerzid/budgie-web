@@ -136,3 +136,7 @@ html, body {
   flex-direction: column;
   min-height: 100%;
 }
+
+dl, ol, ul {
+    margin-bottom: 0;
+}
