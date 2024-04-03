@@ -48,6 +48,59 @@
                 <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                     <div class="message-box-wrapper">
                         <div class="message-box" id="messageBox"></div>
+                        <div style="border: 1px solid #ccc; padding: 10px;">
+                            ADASD
+                        </div>
+                        <div class="input-group">
+                            <div class="btn-group dropup">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    Action
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Greet</a></li>
+                                    <li><a class="dropdown-item" href="#">Thank</a></li>
+                                    <li><a class="dropdown-item" href="#">Move</a></li>
+                                    <li><a class="dropdown-item" href="#">Affirm</a></li>
+                                    <li><a class="dropdown-item" href="#">Deny</a></li>
+                                </ul>
+                            </div>
+                            <div class="btn-group dropup">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    Done By
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">I</a></li>
+                                    <li><a class="dropdown-item" href="#">YOU</a></li>
+                                </ul>
+                            </div>
+                            <div class="btn-group dropup">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    Target Recipients
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">I</a></li>
+                                    <li><a class="dropdown-item" href="#">YOU</a></li>
+                                </ul>
+                            </div>
+                            <div class="btn-group dropup">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    Target Resources
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#">Left eye</a></li>
+                                    <li><a class="dropdown-item" href="#">Right eye</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
                         <div class="input-group">
                             <input type="text" id="sendMessageInput" class="form-control send-message-input"
                                    placeholder="Type your message..." onkeyup="checkEnter(event)"
@@ -94,7 +147,7 @@
         <div class="col-4">
             <div class="message-box-wrapper">
                 <div class="message-box" id="action-history">
-                <!-- Messages will be displayed here -->
+                    <!-- Messages will be displayed here -->
                 </div>
             </div>
         </div>
@@ -116,68 +169,6 @@
 {# for some reason the below code doesn't work if I use module instead of /module #}
 <script src="{% static 'js/settings.js' %}"></script>
 <script src="{% static 'js/scripts.js' %}"></script>
-
-<script>
-    {#var id = document.getElementById("drawflow");#}
-    {#const editor = new Drawflow(id);#}
-    {#editor.reroute = true;#}
-    {#editor.editor_mode = 'view';#}
-    {#editor.start();#}
-{#    var html = `#}
-{#    <div>#}
-{#      <div class="title-box">Session name</div>#}
-{#      <div class="box">#}
-{#        <div class="accordion" id="accordionExample">#}
-{#          <div class="accordion-item">#}
-{#            <h2 class="accordion-header" id="headingOne">#}
-{#              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">#}
-{#                Starting Conditions#}
-{#              </button>#}
-{#            </h2>#}
-{#            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">#}
-{#              <div class="accordion-body">#}
-{#                <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.#}
-{#              </div>#}
-{#            </div>#}
-{#          </div>#}
-{#          <div class="accordion-item">#}
-{#            <h2 class="accordion-header" id="headingTwo">#}
-{#              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">#}
-{#                Expectations#}
-{#              </button>#}
-{#            </h2>#}
-{#            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">#}
-{#              <div class="accordion-body">#}
-{#                <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.#}
-{#              </div>#}
-{#            </div>#}
-{#          </div>#}
-{#          <div class="accordion-item">#}
-{#            <h2 class="accordion-header" id="headingThree">#}
-{#              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">#}
-{#                End Goals#}
-{#              </button>#}
-{#            </h2>#}
-{#            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">#}
-{#              <div class="accordion-body">#}
-{#                <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.#}
-{#              </div>#}
-{#            </div>#}
-{#          </div>#}
-{#        </div>#}
-{#      </div>#}
-{#    </div>#}
-{#`;#}
-{#    var data = {};#}
-{##}
-{#    editor.addNode('github', 1, 1, 150, 300, 'github', data, html);#}
-{#    editor.addNode('github2', 1, 1, 150, 300, 'github', data, html);#}
-{#    editor.import(dataToImport);#}
-{#    editor.addNode('example-1', 1, 1, 200, 50, 'example-node');#}
-{#    editor.addNode('example-2', 1, 1, 400, 100, 'example-node');#}
-{#    editor.addConnection('example-1', 0, 'example-2', 0);#}
-
-</script>
 
 <!-- Font Awesome -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
