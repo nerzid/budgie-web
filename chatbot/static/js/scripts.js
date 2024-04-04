@@ -16,6 +16,12 @@ const url = DIALOGUE_SYSTEM_HOST + ':' + DIALOGUE_SYSTEM_PORT + '/send-message';
 const progressBarQueue = [];
 const intervalUpdateFrequency = 1000;
 
+let action_ids = []
+let actions = []
+let actions_from_id = {}
+let chosen_action = {}
+let chosen_action_template = ""
+
 let session_id = -1
 let sender_agent_id = -1
 let receiver_agent_id = -1
@@ -146,7 +152,9 @@ $(document).ready(function () {
         `;
             actionHistory.scrollTop = actionHistory.scrollHeight;
         } else if (data.ds_action === 'SESSIONS_INFO') {
-            updateSessionsInfo(data.message)
+            updateSessionsInfo(data.message);
+        } else if (data.ds_action === 'ACTIONS_INFO') {
+            updateActionsInfo(data.message);
         } else {
             // Add message to the message box
             messageBox.innerHTML += `
@@ -159,7 +167,86 @@ $(document).ready(function () {
         }
     });
 
-});
+})
+;
+
+function updateActionsInfo(message) {
+    let actionsBox = document.getElementById('actionsBox');
+    // let actionToBuilt = document.getElementById('actionToBuilt');
+    let actionslist = document.getElementById('actions-list');
+    actionsBox.innerHTML = ``;
+    let actionsBoxInnerHtml = ``;
+    message.forEach(action => {
+        // actionsBoxInnerHtml += `${action["Name"]}`;
+        actions.push(action);
+        actionslist.innerHTML += `<li><a class="dropdown-item" href="#" onclick="chooseAction('action-${action["Name"]}')">${action["Name"]}</a></li>`
+        let action_id = "action-" + action["Name"];
+        action_ids.push(action_id);
+        actionsBoxInnerHtml += `<div id="${action_id}">`
+        actions_from_id[action_id] = action;
+        for (let attrs in action) {
+            if (typeof action[attrs] === "string") {
+                // actionsBoxInnerHtml += `${action[attrs]}`;
+                continue;
+            }
+            if (action[attrs].length === 0){
+                continue;
+            }
+
+            actionsBoxInnerHtml += `                    
+                    <div class="btn-group dropup">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    ${attrs}
+                                </button>
+                                <ul class="dropdown-menu">`;
+
+            for (let attr in action[attrs]) {
+                let escaped_attr = action[attrs][attr];
+                if(action[attrs][attr] != null)
+                {
+                    escaped_attr = action[attrs][attr].replace("'", "\\'")
+                }
+                actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${attrs}','${escaped_attr}')">${action[attrs][attr]}</a></li>`
+            }
+            actionsBoxInnerHtml += `</ul></div>`
+        }
+        actionsBoxInnerHtml += `</div>`
+    });
+    actionsBox.innerHTML = actionsBoxInnerHtml;
+    hideAllActions();
+}
+
+function hideAllActions(){
+    for(let action_id in action_ids){
+        document.getElementById(action_ids[action_id]).style.display = 'none';
+    }
+}
+
+function setAttrForChosenAction(attr_name, attr){
+    chosen_action[attr_name] = attr;
+    updateChosenAction();
+}
+
+function chooseAction(actionId){
+    let chosenActionElement = document.getElementById(actionId);
+    hideAllActions();
+    chosenActionElement.style.display = 'inline';
+    chosen_action["Name"] = actionId.split("-")[1]; // get the action name
+    chosen_action_template = actions_from_id[actionId]["template"]
+    updateChosenAction();
+}
+
+function updateChosenAction(){
+    let actionToBuiltInnerHtml = ``;
+    let template = chosen_action_template;
+    for(let attr in chosen_action){
+        // actionToBuiltInnerHtml += `${attr}: ${chosen_action[attr]}, `;
+        template = template.replace("[" + attr + "]", chosen_action[attr]);
+    }
+    document.getElementById('chosenActionBox').innerHTML = template;
+}
 
 function updateSessionsInfo(message) {
     if (editor) {
@@ -182,7 +269,7 @@ function updateSessionsInfo(message) {
 
         let expectations_str = `<ul>`;
         session.expectations.forEach(expectation => {
-           expectations_str += `<li>(${expectation.status}) ${expectation.expectation}</li>`
+            expectations_str += `<li>(${expectation.status}) ${expectation.expectation}</li>`
         });
         expectations_str += `</ul>`;
 
@@ -240,8 +327,8 @@ function updateSessionsInfo(message) {
         editor.addNode(`session${session_ix}`, 1, 1, pos_x + (pos_x_space * session_ix), pos_y, 'github', data, html);
         session_ix += 1;
     })
-    for (let i = session_ix; i > 0; i--){
-        editor.addConnection(`session${i}`, `session${i-1}`, 'output_1', 'input_1');
+    for (let i = session_ix; i > 0; i--) {
+        editor.addConnection(`session${i}`, `session${i - 1}`, 'output_1', 'input_1');
     }
 
 }
