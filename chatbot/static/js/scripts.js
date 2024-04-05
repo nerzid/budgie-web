@@ -179,8 +179,8 @@ function updateActionsInfo(message) {
     message.forEach(action => {
         // actionsBoxInnerHtml += `${action["Name"]}`;
         actions.push(action);
-        actionslist.innerHTML += `<li><a class="dropdown-item" href="#" onclick="chooseAction('action-${action["Name"]}')">${action["Name"]}</a></li>`
-        let action_id = "action-" + action["Name"];
+        actionslist.innerHTML += `<li><a class="dropdown-item" href="#" onclick="chooseAction('action-${action["name"]}')">${action["name"]}</a></li>`
+        let action_id = "action-" + action["name"];
         action_ids.push(action_id);
         actionsBoxInnerHtml += `<div id="${action_id}">`
         actions_from_id[action_id] = action;
@@ -233,7 +233,7 @@ function chooseAction(actionId){
     let chosenActionElement = document.getElementById(actionId);
     hideAllActions();
     chosenActionElement.style.display = 'inline';
-    chosen_action["Name"] = actionId.split("-")[1]; // get the action name
+    chosen_action["name"] = actionId.split("-")[1]; // get the action name
     chosen_action_template = actions_from_id[actionId]["template"]
     updateChosenAction();
 }
