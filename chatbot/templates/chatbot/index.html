@@ -49,66 +49,45 @@
                     <div class="message-box-wrapper">
                         <div class="message-box" id="messageBox"></div>
                         <div id="chosenActionBox" style="border: 1px solid #ccc; padding: 10px;">
-                            -
+
                         </div>
-                        <div class="btn-group dropup">
-                                <button type="button" class="btn btn-outline-dark dropdown-toggle"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    Choose an Action
-                                </button>
-                                <ul id="actions-list" class="dropdown-menu">
-                                </ul>
-                            </div>
                         <div id="actionsBox" class="input-group">
 
-{#                            <div class="btn-group dropup">#}
-{#                                <button type="button" class="btn btn-outline-dark dropdown-toggle"#}
-{#                                        data-bs-toggle="dropdown"#}
-{#                                        aria-expanded="false">#}
-{#                                    Done By#}
-{#                                </button>#}
-{#                                <ul class="dropdown-menu">#}
-{#                                    <li><a class="dropdown-item" href="#">I</a></li>#}
-{#                                    <li><a class="dropdown-item" href="#">YOU</a></li>#}
-{#                                </ul>#}
-{#                            </div>#}
-{#                            <div class="btn-group dropup">#}
-{#                                <button type="button" class="btn btn-outline-dark dropdown-toggle"#}
-{#                                        data-bs-toggle="dropdown"#}
-{#                                        aria-expanded="false">#}
-{#                                    Target Recipients#}
-{#                                </button>#}
-{#                                <ul class="dropdown-menu">#}
-{#                                    <li><a class="dropdown-item" href="#">I</a></li>#}
-{#                                    <li><a class="dropdown-item" href="#">YOU</a></li>#}
-{#                                </ul>#}
-{#                            </div>#}
-{#                            <div class="btn-group dropup">#}
-{#                                <button type="button" class="btn btn-outline-dark dropdown-toggle"#}
-{#                                        data-bs-toggle="dropdown"#}
-{#                                        aria-expanded="false">#}
-{#                                    Target Resources#}
-{#                                </button>#}
-{#                                <ul class="dropdown-menu">#}
-{#                                    <li><a class="dropdown-item" href="#">Left eye</a></li>#}
-{#                                    <li><a class="dropdown-item" href="#">Right eye</a></li>#}
-{#                                </ul>#}
-{#                            </div>#}
                         </div>
-
+                        <div class="btn-group dropup">
+                            <button type="button" class="btn btn-outline-dark dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                Add new action
+                            </button>
+                            <ul id="actions-list" class="dropdown-menu">
+                            </ul>
+                        </div>
                         <div class="input-group">
-                            <input type="text" id="sendMessageInput" class="form-control send-message-input"
-                                   placeholder="Type your message..." onkeyup="checkEnter(event)"
-                                   oninput="toggleSendButton()">
+                            <input type="text" id="sendActionUtteranceInput" class="form-control send-message-input"
+                                   placeholder="Matching utterance will be shown here" onkeyup="checkEnter(event)"
+                                   disabled>
                             <div class="input-group-append">
-                                <button class="btn btn-outline-dark send-message-button" id="sendButton"
-                                        onclick="sendMessage()"
+                                <button class="btn btn-outline-dark send-message-button" id="sendActionButton"
+                                        onclick="sendAction()"
                                         disabled>
                                     <i class="fas fa-arrow-up"></i>
                                 </button>
                             </div>
                         </div>
+
+{#                        <div class="input-group">#}
+{#                            <input type="text" id="sendMessageInput" class="form-control send-message-input"#}
+{#                                   placeholder="Type your message..." onkeyup="checkEnter(event)"#}
+{#                                   oninput="toggleSendButton()">#}
+{#                            <div class="input-group-append">#}
+{#                                <button class="btn btn-outline-dark send-message-button" id="sendButton"#}
+{#                                        onclick="sendMessage()"#}
+{#                                        disabled>#}
+{#                                    <i class="fas fa-arrow-up"></i>#}
+{#                                </button>#}
+{#                            </div>#}
+{#                        </div>#}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">

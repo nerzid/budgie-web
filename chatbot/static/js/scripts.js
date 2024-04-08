@@ -19,7 +19,7 @@ const intervalUpdateFrequency = 1000;
 let action_ids = []
 let actions = []
 let actions_from_id = {}
-let chosen_action = {}
+let chosen_actions = {}
 let chosen_action_template = ""
 
 let session_id = -1
@@ -62,7 +62,7 @@ $(document).ready(function () {
     }, intervalUpdateFrequency);
 
 
-    document.getElementById('sendMessageInput').focus();
+    // document.getElementById('sendMessageInput').focus();
 
     fetch(url, {
         method: 'POST',
@@ -96,19 +96,21 @@ $(document).ready(function () {
             session_id = data.session_id;
             sender_agent_id = data.sender_agent_id
             receiver_agent_id = data.receiver_agent_id
-        } else if (data.ds_action === 'REQUEST_USER_CHOOSE_MENU_OPTION') {
-            // Check if there are options in the response
-            if (data.message && data.message.length > 0) {
-                // Display options as buttons
-                displayOptions(data.message, 'USER_CHOSE_MENU_OPTION');
-            }
+        }
+        else if (data.ds_action === 'REQUEST_USER_CHOOSE_MENU_OPTION') {
+            // // Check if there are options in the response
+            // if (data.message && data.message.length > 0) {
+            //     // Display options as buttons
+            //     displayOptions(data.message, 'USER_CHOSE_MENU_OPTION');
+            // }
         } else if (data.ds_action === 'REQUEST_USER_CHOOSE_UTTERANCE') {
-            // Check if there are options in the response
-            if (data.message && data.message.length > 0) {
-                // Display options as buttons
-                displayOptions(data.message, 'USER_CHOSE_UTTERANCE');
-            }
-        } else if (data.ds_action === 'LOG_ACTION_START') {
+            // // Check if there are options in the response
+            // if (data.message && data.message.length > 0) {
+            //     // Display options as buttons
+            //     displayOptions(data.message, 'USER_CHOSE_UTTERANCE');
+            // }
+        }
+        else if (data.ds_action === 'LOG_ACTION_START') {
             let barId = "id" + Math.random().toString(16).slice(2)
             actionHistory.innerHTML += `
                         <div class="agent">${data.ds_action_by}</div>
@@ -155,6 +157,8 @@ $(document).ready(function () {
             updateSessionsInfo(data.message);
         } else if (data.ds_action === 'ACTIONS_INFO') {
             updateActionsInfo(data.message);
+        } else if (data.ds_action === 'SEND_UTTERANCE_BY_ACTION') {
+            document.getElementById('sendActionUtteranceInput').value = data.message;
         } else {
             // Add message to the message box
             messageBox.innerHTML += `
@@ -179,74 +183,119 @@ function updateActionsInfo(message) {
     message.forEach(action => {
         // actionsBoxInnerHtml += `${action["Name"]}`;
         actions.push(action);
-        actionslist.innerHTML += `<li><a class="dropdown-item" href="#" onclick="chooseAction('action-${action["name"]}')">${action["name"]}</a></li>`
         let action_id = "action-" + action["name"];
         action_ids.push(action_id);
+        actionslist.innerHTML += `<li><a class="dropdown-item" href="#" onclick="chooseAction('${action_id}')">${action["name"]}</a></li>`
         actionsBoxInnerHtml += `<div id="${action_id}">`
         actions_from_id[action_id] = action;
-        for (let attrs in action) {
-            if (typeof action[attrs] === "string") {
-                // actionsBoxInnerHtml += `${action[attrs]}`;
-                continue;
-            }
-            if (action[attrs].length === 0){
-                continue;
-            }
-
-            actionsBoxInnerHtml += `                    
-                    <div class="btn-group dropup">
-                                <button type="button" class="btn btn-outline-dark dropdown-toggle"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    ${attrs}
-                                </button>
-                                <ul class="dropdown-menu">`;
-
-            for (let attr in action[attrs]) {
-                let escaped_attr = action[attrs][attr];
-                if(action[attrs][attr] != null)
-                {
-                    escaped_attr = action[attrs][attr].replace("'", "\\'")
-                }
-                actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${attrs}','${escaped_attr}')">${action[attrs][attr]}</a></li>`
-            }
-            actionsBoxInnerHtml += `</ul></div>`
-        }
+        // for (const [paramName, paramEntries] of Object.entries(action['parameters'])) {
+        //     actionsBoxInnerHtml += `
+        //             <div class="btn-group dropup">
+        //                         <button type="button" class="btn btn-outline-dark dropdown-toggle"
+        //                                 data-bs-toggle="dropdown"
+        //                                 aria-expanded="false">
+        //                             ${paramName}
+        //                         </button>
+        //                         <ul class="dropdown-menu">`;
+        //     for (let paramEntry of paramEntries) {
+        //         let paramValue = paramEntry['value']
+        //         let paramType = paramEntry['type']
+        //
+        //         let escaped_attr = paramValue
+        //         if (paramValue != null) {
+        //             escaped_attr = paramValue.replace("'", "\\'")
+        //         }
+        //         actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${paramName}', '${paramType}', '${escaped_attr}')">${paramValue}</a></li>`
+        //     }
+        //     actionsBoxInnerHtml += `</ul></div>`
+        // }
         actionsBoxInnerHtml += `</div>`
     });
     actionsBox.innerHTML = actionsBoxInnerHtml;
-    hideAllActions();
+    // hideAllActions();
 }
 
-function hideAllActions(){
-    for(let action_id in action_ids){
-        document.getElementById(action_ids[action_id]).style.display = 'none';
-    }
+// function hideAllActions() {
+//     for (let action_id in action_ids) {
+//         document.getElementById(action_ids[action_id]).style.display = 'none';
+//     }
+// }
+
+function setAttrForChosenAction(chosenActionId, paramName, paramType, paramValue) {
+    chosen_actions[chosenActionId]['parameters'][paramName] = {'type': paramType, 'value': paramValue};
+    updateChosenActionTemplate(chosenActionId, paramName, paramType, paramValue);
 }
 
-function setAttrForChosenAction(attr_name, attr){
-    chosen_action[attr_name] = attr;
-    updateChosenAction();
-}
-
-function chooseAction(actionId){
+function chooseAction(actionId) {
     let chosenActionElement = document.getElementById(actionId);
-    hideAllActions();
+    // hideAllActions();
     chosenActionElement.style.display = 'inline';
-    chosen_action["name"] = actionId.split("-")[1]; // get the action name
-    chosen_action_template = actions_from_id[actionId]["template"]
-    updateChosenAction();
+    const chosenActionId = Math.random().toString(16).slice(2);
+    chosen_actions[chosenActionId] = {
+        'actionId': actionId,
+        'name': actionId.split("-")[1],
+        'parameters': {},
+        'template': actions_from_id[actionId]['template'],
+        'action': actions_from_id[actionId]
+    };
+    // chosen_actions[actionId]["name"] = actionId.split("-")[1]; // get the action name
+    // chosen_actions[actionId]['parameters'] = {};
+    // chosen_action_template = actions_from_id[actionId]["template"]
+    showChosenActionTemplate(chosenActionId);
+    updateSuggestedActionUtterance();
 }
 
-function updateChosenAction(){
-    let actionToBuiltInnerHtml = ``;
-    let template = chosen_action_template;
-    for(let attr in chosen_action){
-        // actionToBuiltInnerHtml += `${attr}: ${chosen_action[attr]}, `;
-        template = template.replace("[" + attr + "]", chosen_action[attr]);
+function showChosenActionTemplate(chosenActionId){
+    let template = chosen_actions[chosenActionId]['template']
+    const action = chosen_actions[chosenActionId]['action']
+    for (const [paramName, paramEntries] of Object.entries(action['parameters'])) {
+        let actionsBoxInnerHtml = `
+
+                <div class="btn-group dropup">
+                    <button id="${chosenActionId}-${paramName}" type="button" class="btn btn-outline-dark dropdown-toggle"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        ${paramName}
+                    </button>
+                    <ul class="dropdown-menu">`;
+        for (let paramEntry of paramEntries) {
+            let paramValue = paramEntry['value']
+            let paramType = paramEntry['type']
+
+            let escaped_attr = paramValue
+            if (paramValue != null) {
+                escaped_attr = paramValue.replace("'", "\\'")
+            }
+            actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${chosenActionId}', '${paramName}', '${paramType}', '${escaped_attr}')">${paramValue}</a></li>`
+        }
+        actionsBoxInnerHtml += `</ul></div>`
+
+        template = template.replace("[" + paramName + "]", actionsBoxInnerHtml);
+
     }
-    document.getElementById('chosenActionBox').innerHTML = template;
+    const deleteButton = `<div class="btn-group dropup">
+                                    <button type="button" class="btn btn-outline-danger"
+                                            aria-expanded="false"
+                                            onclick=removeChosenAction('${chosenActionId}')>
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    </div>`
+    const createdAction = `<div id='${chosenActionId}-block'>` + deleteButton + template + `</div>`
+    document.getElementById('chosenActionBox').innerHTML += createdAction;
 }
+
+function removeChosenAction(chosenActionId){
+    delete chosen_actions[chosenActionId];
+    document.getElementById(chosenActionId + '-block').remove();
+    updateSuggestedActionUtterance();
+}
+
+function updateChosenActionTemplate(chosenActionId, paramName, paramType, paramValue) {
+    document.getElementById(chosenActionId+'-'+paramName).innerHTML = paramValue;
+    updateSuggestedActionUtterance();
+}
+
+
 
 function updateSessionsInfo(message) {
     if (editor) {
@@ -327,9 +376,9 @@ function updateSessionsInfo(message) {
         editor.addNode(`session${session_ix}`, 1, 1, pos_x + (pos_x_space * session_ix), pos_y, 'github', data, html);
         session_ix += 1;
     })
-    for (let i = session_ix; i > 0; i--) {
-        editor.addConnection(`session${i}`, `session${i - 1}`, 'output_1', 'input_1');
-    }
+    // for (let i = session_ix; i > 0; i--) {
+    //     editor.addConnection(`session${i}`, `session${i - 1}`, 'output_1', 'input_1');
+    // }
 
 }
 
@@ -376,6 +425,56 @@ function sendMessage() {
     // Clear the input text box
     messageInput.value = '';
     console.log(message);
+
+    fetch(url, {
+        method: 'POST',
+        mode: "cors",
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify(message),
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response from server:', data);
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+        });
+    messageInput.focus();
+}
+
+function sendAction() {
+    const sendActionUtteranceInput = document.getElementById('sendActionUtteranceInput');
+    const messageBox = document.getElementById('messageBox');
+
+    // Get current time
+    const currentTime = new Date().toLocaleTimeString();
+
+    // Add message to the message box
+    messageBox.innerHTML += `
+        <div>${sendActionUtteranceInput.value}</div>
+        <div class="timestamp">${currentTime}</div>
+        <hr>
+    `;
+
+    // Scroll to the bottom of the message box
+    messageBox.scrollTop = messageBox.scrollHeight;
+
+    // Disable the send button again after sending
+    document.getElementById('sendActionButton').disabled = true;
+    let message = {
+        'ds_action_by_type': '',
+        'ds_action_by': 'Joe(patient)',
+        'message': chosen_actions,
+        'ds_action': 'USER_CHOSE_ACTIONS',
+        'session_id': session_id,
+        'sender_agent_id': sender_agent_id,
+        'receiver_agent_id': receiver_agent_id
+    }
+    // Clear the input text box
+    sendActionUtteranceInput.value = '';
 
     fetch(url, {
         method: 'POST',
@@ -459,7 +558,48 @@ function displayOptions(options, ds_action) {
 }
 
 function toggleSendButton() {
-    var sendButton = document.getElementById('sendButton');
-    var messageInput = document.getElementById('sendMessageInput');
+    const sendButton = document.getElementById('sendButton');
+    const messageInput = document.getElementById('sendMessageInput');
     sendButton.disabled = !messageInput.value.trim();
+}
+
+function updateSuggestedActionUtterance() {
+    const sendActionButton = document.getElementById('sendActionButton');
+    const sendActionUtteranceInput = document.getElementById('sendActionUtteranceInput');
+
+    // if the filled in template include a square bracket [, then there exists some values yet to be filled in
+
+    sendActionButton.disabled = document.getElementById('chosenActionBox').innerHTML.toString().includes("[");
+
+    sendActionUtteranceInput.value = '';
+    if (!sendActionButton.disabled) {
+        let message = {
+            'ds_action_by_type': '',
+            'ds_action_by': 'Joe(patient)',
+            'message': Object.values(chosen_actions),
+            'ds_action': 'REQUEST_UTTERANCE_BY_ACTION',
+            'session_id': session_id,
+            'sender_agent_id': sender_agent_id,
+            'receiver_agent_id': receiver_agent_id
+        }
+
+        fetch(url, {
+            method: 'POST',
+            mode: "cors",
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify(message),
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response from server:', data);
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+            });
+    } else {
+        sendActionUtteranceInput.value = '';
+    }
 }
