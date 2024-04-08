@@ -96,8 +96,7 @@ $(document).ready(function () {
             session_id = data.session_id;
             sender_agent_id = data.sender_agent_id
             receiver_agent_id = data.receiver_agent_id
-        }
-        else if (data.ds_action === 'REQUEST_USER_CHOOSE_MENU_OPTION') {
+        } else if (data.ds_action === 'REQUEST_USER_CHOOSE_MENU_OPTION') {
             // // Check if there are options in the response
             // if (data.message && data.message.length > 0) {
             //     // Display options as buttons
@@ -109,8 +108,7 @@ $(document).ready(function () {
             //     // Display options as buttons
             //     displayOptions(data.message, 'USER_CHOSE_UTTERANCE');
             // }
-        }
-        else if (data.ds_action === 'LOG_ACTION_START') {
+        } else if (data.ds_action === 'LOG_ACTION_START') {
             let barId = "id" + Math.random().toString(16).slice(2)
             actionHistory.innerHTML += `
                         <div class="agent">${data.ds_action_by}</div>
@@ -222,15 +220,30 @@ function updateActionsInfo(message) {
 // }
 
 function setAttrForChosenAction(chosenActionId, paramName, paramType, paramValue) {
-    chosen_actions[chosenActionId]['parameters'][paramName] = {'type': paramType, 'value': paramValue};
+    const ids = chosenActionId.split("-")
+
+    let tmp = chosen_actions;
+    for(const id of ids){
+        if (!(id in tmp)){
+            tmp[id] = {'parameters':{}}
+        }
+        tmp = tmp[id]['parameters']
+    }
+    tmp[paramName] = {'type': paramType, 'value': paramValue};
+    // chosen_actions[chosenActionId]['parameters'][paramName] = {'type': paramType, 'value': paramValue};
     updateChosenActionTemplate(chosenActionId, paramName, paramType, paramValue);
+
+}
+
+function getUniqueId(){
+    return Math.random().toString(16).slice(2);
 }
 
 function chooseAction(actionId) {
     let chosenActionElement = document.getElementById(actionId);
     // hideAllActions();
     chosenActionElement.style.display = 'inline';
-    const chosenActionId = Math.random().toString(16).slice(2);
+    const chosenActionId = getUniqueId();
     chosen_actions[chosenActionId] = {
         'actionId': actionId,
         'name': actionId.split("-")[1],
@@ -245,56 +258,209 @@ function chooseAction(actionId) {
     updateSuggestedActionUtterance();
 }
 
-function showChosenActionTemplate(chosenActionId){
-    let template = chosen_actions[chosenActionId]['template']
-    const action = chosen_actions[chosenActionId]['action']
+function showChosenActionTemplate(id) {
+    let template = chosen_actions[id]['template']
+    const action = chosen_actions[id]['action']
     for (const [paramName, paramEntries] of Object.entries(action['parameters'])) {
-        let actionsBoxInnerHtml = `
-
+        let actionsBoxInnerHtml = ``;
+        actionsBoxInnerHtml = `
                 <div class="btn-group dropup">
-                    <button id="${chosenActionId}-${paramName}" type="button" class="btn btn-outline-dark dropdown-toggle"
+                    <button id="${id}-${paramName}" type="button" class="btn btn-outline-dark dropdown-toggle"
                             data-bs-toggle="dropdown"
                             aria-expanded="false">
                         ${paramName}
                     </button>
                     <ul class="dropdown-menu">`;
+        if (paramEntries["type"] === 'Relation' || paramEntries["type"] === 'Action' || paramEntries["type"] === 'Effect') {
+            //     This means we don't need a dropdown because we will use dropdowns inside it. E.g., for relations, actions and effects
+            actionsBoxInnerHtml = `
+                ${paramName}(`;
+        } else {
+            actionsBoxInnerHtml = `
+                <div class="btn-group dropup">
+                    <button id="${id}-${paramName}" type="button" class="btn btn-outline-dark dropdown-toggle"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        ${paramName}
+                    </button>
+                    <ul class="dropdown-menu">`;
+        }
+
         for (let paramEntry of paramEntries) {
             let paramValue = paramEntry['value']
             let paramType = paramEntry['type']
 
-            let escaped_attr = paramValue
-            if (paramValue != null) {
-                escaped_attr = paramValue.replace("'", "\\'")
-            }
-            actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${chosenActionId}', '${paramName}', '${paramType}', '${escaped_attr}')">${paramValue}</a></li>`
-        }
-        actionsBoxInnerHtml += `</ul></div>`
+            if (paramType === 'Relation' || paramType === 'Action' || paramType === 'Effect') {
+                // if ("parameters" in paramValue) {
+                //     let paramTemplate = paramEntry["template"]
+                //     for (const [pparamName, pparamEntries] of Object.entries(paramValue["parameters"])) {
+                //         let pparamInnerHtml = `
+                //                         <div class="btn-group dropup">
+                //             <button id="${chosenActionId}-${pparamName}" type="button" class="btn btn-outline-dark dropdown-toggle"
+                //                     data-bs-toggle="dropdown"
+                //                     aria-expanded="false">
+                //                 ${pparamName}
+                //             </button>
+                //             <ul class="dropdown-menu">\`;
+                //                 `;
+                //         for (let pparamEntry of pparamEntries) {
+                //             if (pparamEntry != null) {
+                //                 let pparamValue = pparamEntry['value']
+                //
+                //                 let pparamType = pparamEntry['type']
+                //                 let param_escaped_attr = pparamValue
+                //                 if (pparamValue != null) {
+                //                     param_escaped_attr = pparamValue.replace("'", "\\'")
+                //                 }
+                //                 pparamInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${chosenActionId}', '${pparamName}', '${pparamType}', '${param_escaped_attr}')">${paramValue}</a></li>`
+                //             }
+                //         }
+                //         pparamInnerHtml += `</ul></div>`
+                //         paramTemplate = paramTemplate.replace("[" + paramName + "]", actionsBoxInnerHtml);
+                //     }
+                //     paramValue = paramTemplate;
+                // }
+                // let escaped_attr = paramValue
+                if (paramValue != null) {
+                    // escaped_attr = paramValue.replace("'", "\\'")
+                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}', '${encodeURIComponent(JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE"))}')">${paramType}</a></li>`
+                }
+            } else {
 
+                let escaped_attr = paramValue
+                if (paramValue != null) {
+                    if (typeof (paramValue) === 'string') {
+                        escaped_attr = paramValue.replace("'", "\\'")
+                    }
+                    actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${id}', '${paramName}', '${paramType}', '${escaped_attr}')">${paramValue}</a></li>`
+                }
+            }
+
+        }
+
+        actionsBoxInnerHtml += `</ul></div>`
         template = template.replace("[" + paramName + "]", actionsBoxInnerHtml);
 
     }
     const deleteButton = `<div class="btn-group dropup">
                                     <button type="button" class="btn btn-outline-danger"
                                             aria-expanded="false"
-                                            onclick=removeChosenAction('${chosenActionId}')>
+                                            onclick=removeChosenAction('${id}')>
                                         <i class="fas fa-minus"></i>
                                     </button>
                                     </div>`
-    const createdAction = `<div id='${chosenActionId}-block'>` + deleteButton + template + `</div>`
+    const createdAction = `<div id='${id}-block' class='box-border'>` + deleteButton + `<p>` + action['name'] + `</p>` + template + `</div>`
     document.getElementById('chosenActionBox').innerHTML += createdAction;
 }
 
-function removeChosenAction(chosenActionId){
+function createNewParameterBlock(id, blockParam) {
+    blockParam = JSON.parse(decodeURIComponent(blockParam.replaceAll("TMPQUOTE", "'")));
+    const blockId = getUniqueId();
+    let template = blockParam['template']
+    for (const [paramName, paramEntries] of Object.entries(blockParam['value']['parameters'])) {
+        let actionsBoxInnerHtml = ``;
+        actionsBoxInnerHtml = `
+                <div class="btn-group dropup">
+                    <button id="${blockId}-${paramName}" type="button" class="btn btn-outline-dark dropdown-toggle"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        ${paramName}
+                    </button>
+                    <ul class="dropdown-menu">`;
+        if (paramEntries["type"] === 'Relation' || paramEntries["type"] === 'Action' || paramEntries["type"] === 'Effect') {
+            //     This means we don't need a dropdown because we will use dropdowns inside it. E.g., for relations, actions and effects
+            actionsBoxInnerHtml = `
+                ${paramName}(`;
+        } else {
+            actionsBoxInnerHtml = `
+                <div class="btn-group dropup">
+                    <button id="${blockId}-${paramName}" type="button" class="btn btn-outline-dark dropdown-toggle"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        ${paramName}
+                    </button>
+                    <ul class="dropdown-menu">`;
+        }
+
+        for (let paramEntry of paramEntries) {
+            if (paramEntry == null)
+                continue;
+            let paramValue = paramEntry['value']
+            let paramType = paramEntry['type']
+
+            if (paramType === 'Relation' || paramType === 'Action' || paramType === 'Effect') {
+                // if ("parameters" in paramValue) {
+                //     let paramTemplate = paramEntry["template"]
+                //     for (const [pparamName, pparamEntries] of Object.entries(paramValue["parameters"])) {
+                //         let pparamInnerHtml = `
+                //                         <div class="btn-group dropup">
+                //             <button id="${chosenActionId}-${pparamName}" type="button" class="btn btn-outline-dark dropdown-toggle"
+                //                     data-bs-toggle="dropdown"
+                //                     aria-expanded="false">
+                //                 ${pparamName}
+                //             </button>
+                //             <ul class="dropdown-menu">\`;
+                //                 `;
+                //         for (let pparamEntry of pparamEntries) {
+                //             if (pparamEntry != null) {
+                //                 let pparamValue = pparamEntry['value']
+                //
+                //                 let pparamType = pparamEntry['type']
+                //                 let param_escaped_attr = pparamValue
+                //                 if (pparamValue != null) {
+                //                     param_escaped_attr = pparamValue.replace("'", "\\'")
+                //                 }
+                //                 pparamInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${chosenActionId}', '${pparamName}', '${pparamType}', '${param_escaped_attr}')">${paramValue}</a></li>`
+                //             }
+                //         }
+                //         pparamInnerHtml += `</ul></div>`
+                //         paramTemplate = paramTemplate.replace("[" + paramName + "]", actionsBoxInnerHtml);
+                //     }
+                //     paramValue = paramTemplate;
+                // }
+                // let escaped_attr = paramValue
+                if (paramValue != null) {
+                    // escaped_attr = paramValue.replace("'", "\\'")
+                    actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="createNewParameterBlock('${blockId}', '${paramEntry}')">${paramType}</a></li>`
+                }
+            } else {
+
+                let escaped_attr = paramValue
+                if (paramValue != null) {
+                    if (typeof (paramValue) === 'string') {
+                        escaped_attr = paramValue.replace("'", "\\'")
+                    }
+                    actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${id}-${blockId}', '${paramName}', '${paramType}', '${escaped_attr}')">${paramValue}</a></li>`
+                }
+            }
+
+        }
+
+        actionsBoxInnerHtml += `</ul></div>`
+        template = template.replace("[" + paramName + "]", actionsBoxInnerHtml);
+mti
+    }
+    const deleteButton = `<div class="btn-group dropup">
+                                    <button type="button" class="btn btn-outline-danger"
+                                            aria-expanded="false"
+                                            onclick=removeChosenAction('${blockId}')>
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    </div>`
+    const createdAction = `<div id='${blockId}-block' class='box-border'>` + deleteButton + `<p>` + blockParam['type'] + `</p>` + template + `</div>`
+    document.getElementById(id + '-block').innerHTML += createdAction;
+}
+
+function removeChosenAction(chosenActionId) {
     delete chosen_actions[chosenActionId];
     document.getElementById(chosenActionId + '-block').remove();
     updateSuggestedActionUtterance();
 }
 
 function updateChosenActionTemplate(chosenActionId, paramName, paramType, paramValue) {
-    document.getElementById(chosenActionId+'-'+paramName).innerHTML = paramValue;
+    document.getElementById(chosenActionId.split("-")[-1] + '-' + paramName).innerHTML = paramValue;
     updateSuggestedActionUtterance();
 }
-
 
 
 function updateSessionsInfo(message) {

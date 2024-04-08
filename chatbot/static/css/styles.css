@@ -140,3 +140,14 @@ html, body {
 dl, ol, ul {
     margin-bottom: 0;
 }
+
+.box-border {
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+.dropdown-menu {
+  overflow: hidden;
+  overflow-y: auto;
+  max-height: 300px;
+}
