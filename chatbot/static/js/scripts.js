@@ -21,6 +21,8 @@ let actions = []
 let actions_from_id = {}
 let chosen_actions = {}
 let chosen_action_template = ""
+let param_id_to_name_map = {}
+let param_id_to_type_map = {}
 
 let session_id = -1
 let sender_agent_id = -1
@@ -222,20 +224,36 @@ function updateActionsInfo(message) {
 function setAttrForChosenAction(chosenActionId, paramName, paramType, paramValue) {
     const ids = chosenActionId.split("-")
 
-    let tmp = chosen_actions;
-    for(const id of ids){
-        if (!(id in tmp)){
-            tmp[id] = {'parameters':{}}
+    let tmp = chosen_actions[ids[0]];
+    // if (!('parameters' in tmp)) {
+    //
+    // }
+    tmp = tmp['parameters']
+    if (ids.length > 1) {
+        for (let i = 1; i < ids.length; i++) {
+            const param_name = param_id_to_name_map[ids[i]]
+            const param_type = param_id_to_type_map[ids[i]]
+            if (!(param_name in tmp)) {
+                tmp[param_name] = {'type': param_type,
+                                    'value': {}}
+            }
+            tmp = tmp[param_name]['value']
         }
-        tmp = tmp[id]['parameters']
+        // for (const id of ids) {
+        //     if (!(id in tmp)) {
+        //         tmp[id] = {}
+        //     }
+        //     tmp = tmp[id]
+        // }
     }
+
     tmp[paramName] = {'type': paramType, 'value': paramValue};
     // chosen_actions[chosenActionId]['parameters'][paramName] = {'type': paramType, 'value': paramValue};
     updateChosenActionTemplate(chosenActionId, paramName, paramType, paramValue);
 
 }
 
-function getUniqueId(){
+function getUniqueId() {
     return Math.random().toString(16).slice(2);
 }
 
@@ -271,7 +289,7 @@ function showChosenActionTemplate(id) {
                         ${paramName}
                     </button>
                     <ul class="dropdown-menu">`;
-        if (paramEntries["type"] === 'Relation' || paramEntries["type"] === 'Action' || paramEntries["type"] === 'Effect') {
+        if (paramEntries["type"] === 'Information' || paramEntries["type"] === 'Action' || paramEntries["type"] === 'Effect') {
             //     This means we don't need a dropdown because we will use dropdowns inside it. E.g., for relations, actions and effects
             actionsBoxInnerHtml = `
                 ${paramName}(`;
@@ -290,7 +308,7 @@ function showChosenActionTemplate(id) {
             let paramValue = paramEntry['value']
             let paramType = paramEntry['type']
 
-            if (paramType === 'Relation' || paramType === 'Action' || paramType === 'Effect') {
+            if (paramType === 'Information' || paramType === 'Action' || paramType === 'Effect') {
                 // if ("parameters" in paramValue) {
                 //     let paramTemplate = paramEntry["template"]
                 //     for (const [pparamName, pparamEntries] of Object.entries(paramValue["parameters"])) {
@@ -323,7 +341,7 @@ function showChosenActionTemplate(id) {
                 // let escaped_attr = paramValue
                 if (paramValue != null) {
                     // escaped_attr = paramValue.replace("'", "\\'")
-                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}', '${encodeURIComponent(JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE"))}')">${paramType}</a></li>`
+                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}','${paramName}', '${encodeURIComponent(JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE"))}')">${paramType}</a></li>`
                 }
             } else {
 
@@ -353,10 +371,12 @@ function showChosenActionTemplate(id) {
     document.getElementById('chosenActionBox').innerHTML += createdAction;
 }
 
-function createNewParameterBlock(id, blockParam) {
+function createNewParameterBlock(id, blockParamName, blockParam) {
     blockParam = JSON.parse(decodeURIComponent(blockParam.replaceAll("TMPQUOTE", "'")));
     const blockId = getUniqueId();
     let template = blockParam['template']
+    param_id_to_name_map[blockId] = blockParamName
+    param_id_to_type_map[blockId] = blockParam['type']
     for (const [paramName, paramEntries] of Object.entries(blockParam['value']['parameters'])) {
         let actionsBoxInnerHtml = ``;
         actionsBoxInnerHtml = `
@@ -367,7 +387,7 @@ function createNewParameterBlock(id, blockParam) {
                         ${paramName}
                     </button>
                     <ul class="dropdown-menu">`;
-        if (paramEntries["type"] === 'Relation' || paramEntries["type"] === 'Action' || paramEntries["type"] === 'Effect') {
+        if (paramEntries["type"] === 'Information' || paramEntries["type"] === 'Action' || paramEntries["type"] === 'Effect') {
             //     This means we don't need a dropdown because we will use dropdowns inside it. E.g., for relations, actions and effects
             actionsBoxInnerHtml = `
                 ${paramName}(`;
@@ -388,7 +408,7 @@ function createNewParameterBlock(id, blockParam) {
             let paramValue = paramEntry['value']
             let paramType = paramEntry['type']
 
-            if (paramType === 'Relation' || paramType === 'Action' || paramType === 'Effect') {
+            if (paramType === 'Information' || paramType === 'Action' || paramType === 'Effect') {
                 // if ("parameters" in paramValue) {
                 //     let paramTemplate = paramEntry["template"]
                 //     for (const [pparamName, pparamEntries] of Object.entries(paramValue["parameters"])) {
@@ -438,7 +458,7 @@ function createNewParameterBlock(id, blockParam) {
 
         actionsBoxInnerHtml += `</ul></div>`
         template = template.replace("[" + paramName + "]", actionsBoxInnerHtml);
-mti
+
     }
     const deleteButton = `<div class="btn-group dropup">
                                     <button type="button" class="btn btn-outline-danger"
@@ -458,7 +478,7 @@ function removeChosenAction(chosenActionId) {
 }
 
 function updateChosenActionTemplate(chosenActionId, paramName, paramType, paramValue) {
-    document.getElementById(chosenActionId.split("-")[-1] + '-' + paramName).innerHTML = paramValue;
+    document.getElementById((chosenActionId).split("-").slice(-1)[0] + '-' + paramName).innerHTML = paramValue;
     updateSuggestedActionUtterance();
 }
 
