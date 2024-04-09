@@ -20,7 +20,11 @@ let action_ids = []
 let actions = []
 let actions_from_id = {}
 let chosen_actions = {}
-let chosen_action_template = ""
+
+let effect_ids = []
+let effects = []
+let effects_from_id = {}
+
 let param_id_to_name_map = {}
 let param_id_to_type_map = {}
 
@@ -157,6 +161,8 @@ $(document).ready(function () {
             updateSessionsInfo(data.message);
         } else if (data.ds_action === 'ACTIONS_INFO') {
             updateActionsInfo(data.message);
+        } else if (data.ds_action === 'EFFECTS_INFO') {
+            updateEffectsInfo(data.message);
         } else if (data.ds_action === 'SEND_UTTERANCE_BY_ACTION') {
             document.getElementById('sendActionUtteranceInput').value = data.message;
         } else {
@@ -188,63 +194,39 @@ function updateActionsInfo(message) {
         actionslist.innerHTML += `<li><a class="dropdown-item" href="#" onclick="chooseAction('${action_id}')">${action["name"]}</a></li>`
         actionsBoxInnerHtml += `<div id="${action_id}">`
         actions_from_id[action_id] = action;
-        // for (const [paramName, paramEntries] of Object.entries(action['parameters'])) {
-        //     actionsBoxInnerHtml += `
-        //             <div class="btn-group dropup">
-        //                         <button type="button" class="btn btn-outline-dark dropdown-toggle"
-        //                                 data-bs-toggle="dropdown"
-        //                                 aria-expanded="false">
-        //                             ${paramName}
-        //                         </button>
-        //                         <ul class="dropdown-menu">`;
-        //     for (let paramEntry of paramEntries) {
-        //         let paramValue = paramEntry['value']
-        //         let paramType = paramEntry['type']
-        //
-        //         let escaped_attr = paramValue
-        //         if (paramValue != null) {
-        //             escaped_attr = paramValue.replace("'", "\\'")
-        //         }
-        //         actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${paramName}', '${paramType}', '${escaped_attr}')">${paramValue}</a></li>`
-        //     }
-        //     actionsBoxInnerHtml += `</ul></div>`
-        // }
         actionsBoxInnerHtml += `</div>`
     });
     actionsBox.innerHTML = actionsBoxInnerHtml;
-    // hideAllActions();
 }
 
-// function hideAllActions() {
-//     for (let action_id in action_ids) {
-//         document.getElementById(action_ids[action_id]).style.display = 'none';
-//     }
-// }
+function updateEffectsInfo(message) {
+    message.forEach(effect => {
+        effects.push(effect);
+        let effect_id = "effect-" + effect["name"];
+        effect_ids.push(effect_id);
+        effects_from_id[effect_id] = effect;
+    });
+}
+
 
 function setAttrForChosenAction(chosenActionId, paramName, paramType, paramValue) {
     const ids = chosenActionId.split("-")
 
     let tmp = chosen_actions[ids[0]];
-    // if (!('parameters' in tmp)) {
-    //
-    // }
+
     tmp = tmp['parameters']
     if (ids.length > 1) {
         for (let i = 1; i < ids.length; i++) {
             const param_name = param_id_to_name_map[ids[i]]
             const param_type = param_id_to_type_map[ids[i]]
             if (!(param_name in tmp)) {
-                tmp[param_name] = {'type': param_type,
-                                    'value': {}}
+                tmp[param_name] = {
+                    'type': param_type,
+                    'value': {}
+                }
             }
             tmp = tmp[param_name]['value']
         }
-        // for (const id of ids) {
-        //     if (!(id in tmp)) {
-        //         tmp[id] = {}
-        //     }
-        //     tmp = tmp[id]
-        // }
     }
 
     tmp[paramName] = {'type': paramType, 'value': paramValue};
@@ -289,60 +271,22 @@ function showChosenActionTemplate(id) {
                         ${paramName}
                     </button>
                     <ul class="dropdown-menu">`;
-        if (paramEntries["type"] === 'Information' || paramEntries["type"] === 'Action' || paramEntries["type"] === 'Effect') {
-            //     This means we don't need a dropdown because we will use dropdowns inside it. E.g., for relations, actions and effects
-            actionsBoxInnerHtml = `
-                ${paramName}(`;
-        } else {
-            actionsBoxInnerHtml = `
-                <div class="btn-group dropup">
-                    <button id="${id}-${paramName}" type="button" class="btn btn-outline-dark dropdown-toggle"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                        ${paramName}
-                    </button>
-                    <ul class="dropdown-menu">`;
-        }
 
         for (let paramEntry of paramEntries) {
             let paramValue = paramEntry['value']
             let paramType = paramEntry['type']
 
-            if (paramType === 'Information' || paramType === 'Action' || paramType === 'Effect') {
-                // if ("parameters" in paramValue) {
-                //     let paramTemplate = paramEntry["template"]
-                //     for (const [pparamName, pparamEntries] of Object.entries(paramValue["parameters"])) {
-                //         let pparamInnerHtml = `
-                //                         <div class="btn-group dropup">
-                //             <button id="${chosenActionId}-${pparamName}" type="button" class="btn btn-outline-dark dropdown-toggle"
-                //                     data-bs-toggle="dropdown"
-                //                     aria-expanded="false">
-                //                 ${pparamName}
-                //             </button>
-                //             <ul class="dropdown-menu">\`;
-                //                 `;
-                //         for (let pparamEntry of pparamEntries) {
-                //             if (pparamEntry != null) {
-                //                 let pparamValue = pparamEntry['value']
-                //
-                //                 let pparamType = pparamEntry['type']
-                //                 let param_escaped_attr = pparamValue
-                //                 if (pparamValue != null) {
-                //                     param_escaped_attr = pparamValue.replace("'", "\\'")
-                //                 }
-                //                 pparamInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${chosenActionId}', '${pparamName}', '${pparamType}', '${param_escaped_attr}')">${paramValue}</a></li>`
-                //             }
-                //         }
-                //         pparamInnerHtml += `</ul></div>`
-                //         paramTemplate = paramTemplate.replace("[" + paramName + "]", actionsBoxInnerHtml);
-                //     }
-                //     paramValue = paramTemplate;
-                // }
-                // let escaped_attr = paramValue
+            if (paramType === 'Information') {
                 if (paramValue != null) {
                     // escaped_attr = paramValue.replace("'", "\\'")
-                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}','${paramName}', '${encodeURIComponent(JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE"))}')">${paramType}</a></li>`
+                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}','${paramName}', '${paramType}', '${encodeURIComponent(JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE"))}')">${paramType}</a></li>`
                 }
+            } else if (paramType === 'Action') {
+                paramValue.forEach(action_name => {
+                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}','${paramName}', '${paramType}', '${action_name}')">${action_name}</a></li>`
+                });
+            } else if (paramType === 'Effect') {
+                actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}','${paramName}', '${paramType}', '${encodeURIComponent(JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE"))}')">${paramValue}</a></li>`
             } else {
 
                 let escaped_attr = paramValue
@@ -371,13 +315,28 @@ function showChosenActionTemplate(id) {
     document.getElementById('chosenActionBox').innerHTML += createdAction;
 }
 
-function createNewParameterBlock(id, blockParamName, blockParam) {
-    blockParam = JSON.parse(decodeURIComponent(blockParam.replaceAll("TMPQUOTE", "'")));
+function createNewParameterBlock(id, blockParamName, blockParamType, blockParam) {
     const blockId = getUniqueId();
-    let template = blockParam['template']
+    let template = '';
+    let parameters = {};
+    let blockName = '';
+    if (blockParamType === 'Information') {
+        blockParam = JSON.parse(decodeURIComponent(blockParam.replaceAll("TMPQUOTE", "'")));
+        template = blockParam['template']
+        parameters = blockParam['value']['parameters']
+        blockName = blockParamType
+    } else if (blockParamType === 'Action') {
+        const action = actions_from_id['action-' + blockParam]; // here, blockParam is the name of the action
+        template = action['template']
+        parameters = action['parameters']
+        blockName = action['name']
+        blockParamType = blockParamType + '-' + blockName
+    } else if (blockParamType === 'Effect') {
+
+    }
     param_id_to_name_map[blockId] = blockParamName
-    param_id_to_type_map[blockId] = blockParam['type']
-    for (const [paramName, paramEntries] of Object.entries(blockParam['value']['parameters'])) {
+    param_id_to_type_map[blockId] = blockParamType
+    for (const [paramName, paramEntries] of Object.entries(parameters)) {
         let actionsBoxInnerHtml = ``;
         actionsBoxInnerHtml = `
                 <div class="btn-group dropup">
@@ -387,20 +346,6 @@ function createNewParameterBlock(id, blockParamName, blockParam) {
                         ${paramName}
                     </button>
                     <ul class="dropdown-menu">`;
-        if (paramEntries["type"] === 'Information' || paramEntries["type"] === 'Action' || paramEntries["type"] === 'Effect') {
-            //     This means we don't need a dropdown because we will use dropdowns inside it. E.g., for relations, actions and effects
-            actionsBoxInnerHtml = `
-                ${paramName}(`;
-        } else {
-            actionsBoxInnerHtml = `
-                <div class="btn-group dropup">
-                    <button id="${blockId}-${paramName}" type="button" class="btn btn-outline-dark dropdown-toggle"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                        ${paramName}
-                    </button>
-                    <ul class="dropdown-menu">`;
-        }
 
         for (let paramEntry of paramEntries) {
             if (paramEntry == null)
@@ -408,43 +353,20 @@ function createNewParameterBlock(id, blockParamName, blockParam) {
             let paramValue = paramEntry['value']
             let paramType = paramEntry['type']
 
-            if (paramType === 'Information' || paramType === 'Action' || paramType === 'Effect') {
-                // if ("parameters" in paramValue) {
-                //     let paramTemplate = paramEntry["template"]
-                //     for (const [pparamName, pparamEntries] of Object.entries(paramValue["parameters"])) {
-                //         let pparamInnerHtml = `
-                //                         <div class="btn-group dropup">
-                //             <button id="${chosenActionId}-${pparamName}" type="button" class="btn btn-outline-dark dropdown-toggle"
-                //                     data-bs-toggle="dropdown"
-                //                     aria-expanded="false">
-                //                 ${pparamName}
-                //             </button>
-                //             <ul class="dropdown-menu">\`;
-                //                 `;
-                //         for (let pparamEntry of pparamEntries) {
-                //             if (pparamEntry != null) {
-                //                 let pparamValue = pparamEntry['value']
-                //
-                //                 let pparamType = pparamEntry['type']
-                //                 let param_escaped_attr = pparamValue
-                //                 if (pparamValue != null) {
-                //                     param_escaped_attr = pparamValue.replace("'", "\\'")
-                //                 }
-                //                 pparamInnerHtml += `<li><a class="dropdown-item" href="#" onclick="setAttrForChosenAction('${chosenActionId}', '${pparamName}', '${pparamType}', '${param_escaped_attr}')">${paramValue}</a></li>`
-                //             }
-                //         }
-                //         pparamInnerHtml += `</ul></div>`
-                //         paramTemplate = paramTemplate.replace("[" + paramName + "]", actionsBoxInnerHtml);
-                //     }
-                //     paramValue = paramTemplate;
-                // }
-                // let escaped_attr = paramValue
+           if (paramType === 'Information') {
                 if (paramValue != null) {
                     // escaped_attr = paramValue.replace("'", "\\'")
-                    actionsBoxInnerHtml += `<li><a class="dropdown-item" href="#" onclick="createNewParameterBlock('${blockId}', '${paramEntry}')">${paramType}</a></li>`
+                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}-${blockId}','${paramName}', '${paramType}', '${encodeURIComponent(JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE"))}')">${paramType}</a></li>`
                 }
-            } else {
-
+            } else if (paramType === 'Action') {
+                paramValue.forEach(action_name => {
+                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}-${blockId}','${paramName}', '${paramType}', '${action_name}')">${action_name}</a></li>`
+                });
+            } else if (paramType === 'Effect') {
+                paramValue.forEach(effect_name => {
+                    actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}-${blockId}','${paramName}', '${paramType}', '${effect_name}')">${effect_name}</a></li>`
+                });
+            }else {
                 let escaped_attr = paramValue
                 if (paramValue != null) {
                     if (typeof (paramValue) === 'string') {
@@ -467,8 +389,8 @@ function createNewParameterBlock(id, blockParamName, blockParam) {
                                         <i class="fas fa-minus"></i>
                                     </button>
                                     </div>`
-    const createdAction = `<div id='${blockId}-block' class='box-border'>` + deleteButton + `<p>` + blockParam['type'] + `</p>` + template + `</div>`
-    document.getElementById(id + '-block').innerHTML += createdAction;
+    const createdAction = `<div id='${blockId}-block' class='box-border'>` + deleteButton + `<p>` + blockName + `</p>` + template + `</div>`
+    document.getElementById(id.split('-').slice(-1)[0] + '-block').innerHTML += createdAction;
 }
 
 function removeChosenAction(chosenActionId) {
