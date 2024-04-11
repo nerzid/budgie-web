@@ -550,57 +550,48 @@ function sendMessage() {
         .catch(error => {
             console.error('Error sending message:', error);
         });
-    messageInput.focus();
+    // messageInput.focus();
 }
 
 function sendAction() {
+    const sendActionButton = document.getElementById('sendActionButton');
     const sendActionUtteranceInput = document.getElementById('sendActionUtteranceInput');
-    const messageBox = document.getElementById('messageBox');
 
-    // Get current time
-    const currentTime = new Date().toLocaleTimeString();
+    // if the filled in template include a square bracket [, then there exists some values yet to be filled in
 
-    // Add message to the message box
-    messageBox.innerHTML += `
-        <div>${sendActionUtteranceInput.value}</div>
-        <div class="timestamp">${currentTime}</div>
-        <hr>
-    `;
+    sendActionButton.disabled = document.getElementById('chosenActionBox').innerHTML.toString().includes("[");
 
-    // Scroll to the bottom of the message box
-    messageBox.scrollTop = messageBox.scrollHeight;
-
-    // Disable the send button again after sending
-    document.getElementById('sendActionButton').disabled = true;
-    let message = {
-        'ds_action_by_type': '',
-        'ds_action_by': 'Joe(patient)',
-        'message': chosen_actions,
-        'ds_action': 'USER_CHOSE_ACTIONS',
-        'session_id': session_id,
-        'sender_agent_id': sender_agent_id,
-        'receiver_agent_id': receiver_agent_id
-    }
-    // Clear the input text box
     sendActionUtteranceInput.value = '';
+    if (!sendActionButton.disabled) {
+        let message = {
+            'ds_action_by_type': '',
+            'ds_action_by': 'Joe(patient)',
+            'message': Object.values(chosen_actions),
+            'ds_action': 'USER_CHOSE_ACTIONS',
+            'session_id': session_id,
+            'sender_agent_id': sender_agent_id,
+            'receiver_agent_id': receiver_agent_id
+        }
 
-    fetch(url, {
-        method: 'POST',
-        mode: "cors",
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-        },
-        body: JSON.stringify(message),
-    })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Response from server:', data);
+        fetch(url, {
+            method: 'POST',
+            mode: "cors",
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            body: JSON.stringify(message),
         })
-        .catch(error => {
-            console.error('Error sending message:', error);
-        });
-    messageInput.focus();
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response from server:', data);
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+            });
+    } else {
+        sendActionUtteranceInput.value = '';
+    }
 }
 
 function checkEnter(event) {
