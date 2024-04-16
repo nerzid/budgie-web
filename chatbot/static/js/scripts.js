@@ -163,7 +163,7 @@ $(document).ready(function () {
             updateActionsInfo(data.message);
         } else if (data.ds_action === 'EFFECTS_INFO') {
             updateEffectsInfo(data.message);
-        } else if (data.ds_action === 'SEND_UTTERANCE_BY_ACTION') {
+        } else if (data.ds_action === 'SEND_UTTERANCE_BY_ACTION' || data.ds_action === 'REQUEST_UTTERANCE_BY_STRING_MATCH') {
             document.getElementById('sendActionUtteranceInput').value = data.message;
         } else {
             // Add message to the message box
@@ -701,4 +701,37 @@ function updateSuggestedActionUtterance() {
     } else {
         sendActionUtteranceInput.value = '';
     }
+}
+
+function updateSuggestedActionUtteranceByInput(){
+    const sendActionButton = document.getElementById('sendActionButton');
+    const sendActionUtteranceInput = document.getElementById('sendMessageInput');
+
+    const inputText = sendActionUtteranceInput.value
+    let message = {
+        'ds_action_by_type': '',
+        'ds_action_by': 'Joe(patient)',
+        'message': inputText,
+        'ds_action': 'REQUEST_UTTERANCE_BY_STRING_MATCH',
+        'session_id': session_id,
+        'sender_agent_id': sender_agent_id,
+        'receiver_agent_id': receiver_agent_id
+    }
+
+    fetch(url, {
+        method: 'POST',
+        mode: "cors",
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify(message),
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response from server:', data);
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+        });
 }
