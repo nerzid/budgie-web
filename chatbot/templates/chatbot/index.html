@@ -65,26 +65,25 @@
                         </div>
                         <div class="input-group">
                             <input type="text" id="sendActionUtteranceInput" class="form-control send-message-input"
-                                   placeholder="Matching utterance will be shown here" onkeyup="checkEnter(event)"
+                                   placeholder="Matching utterance will be shown here"
                                    disabled>
                             <div class="input-group-append">
                                 <button class="btn btn-outline-dark send-message-button" id="sendActionButton"
-                                        onclick="sendAction()"
-                                        disabled>
+                                        onclick="sendAction()">
                                     <i class="fas fa-arrow-up"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="input-group">
                             <input type="text" id="sendMessageInput" class="form-control send-message-input"
-                                   placeholder="Type to search for an utterance here" onkeydown="updateSuggestedActionUtteranceByInput()">
-{#                            <div class="input-group-append">#}
-{#                                <button class="btn btn-outline-dark send-message-button" id="sendActionButton"#}
-{#                                        onclick="sendAction()"#}
-{#                                        disabled>#}
-{#                                    <i class="fas fa-arrow-up"></i>#}
-{#                                </button>#}
-{#                            </div>#}
+                                   placeholder="Type to search for an utterance here">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-dark send-message-button" id="sendMessageButton"
+                                        onclick="sendMessage()"
+                                        disabled>
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                            </div>
                         </div>
 
                         {#                        <div class="input-group">#}

@@ -39,6 +39,9 @@ editor.editor_mode = 'edit';
 editor.start();
 
 $(document).ready(function () {
+    const sendMessageInput = document.getElementById('sendMessageInput');
+    sendMessageInput.focus();
+
     function processQueue() {
         if (progressBarQueue.length > 0) {
             for (const progressbarId of progressBarQueue) {
@@ -166,19 +169,24 @@ $(document).ready(function () {
         } else if (data.ds_action === 'SEND_UTTERANCE_BY_ACTION' || data.ds_action === 'REQUEST_UTTERANCE_BY_STRING_MATCH') {
             document.getElementById('sendActionUtteranceInput').value = data.message;
         } else {
-            // Add message to the message box
-            messageBox.innerHTML += `
-                <div class="agent">${data.ds_action_by}</div>
-                <div>${message}</div>
-                <div class="timestamp">${currentTime}</div>
-                <hr>
-            `;
-            messageBox.scrollTop = messageBox.scrollHeight;
+            addMessageToMessageBox(data.ds_action_by, message);
         }
     });
 
 })
 ;
+
+function addMessageToMessageBox(messageBy, message) {
+    const messageBox = document.getElementById('messageBox');
+    var currentTime = new Date().toLocaleTimeString();
+    messageBox.innerHTML += `
+                <div class="agent">${messageBy}</div>
+                <div>${message}</div>
+                <div class="timestamp">${currentTime}</div>
+                <hr>
+            `;
+    messageBox.scrollTop = messageBox.scrollHeight;
+}
 
 function updateActionsInfo(message) {
     let actionsBox = document.getElementById('actionsBox');
@@ -353,7 +361,7 @@ function createNewParameterBlock(id, blockParamName, blockParamType, blockParam)
             let paramValue = paramEntry['value']
             let paramType = paramEntry['type']
 
-           if (paramType === 'Information') {
+            if (paramType === 'Information') {
                 if (paramValue != null) {
                     // escaped_attr = paramValue.replace("'", "\\'")
                     actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}-${blockId}','${paramName}', '${paramType}', '${encodeURIComponent(JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE"))}')">${paramType}</a></li>`
@@ -366,7 +374,7 @@ function createNewParameterBlock(id, blockParamName, blockParamType, blockParam)
                 paramValue.forEach(effect_name => {
                     actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}-${blockId}','${paramName}', '${paramType}', '${effect_name}')">${effect_name}</a></li>`
                 });
-            }else {
+            } else {
                 let escaped_attr = paramValue
                 if (paramValue != null) {
                     if (typeof (paramValue) === 'string') {
@@ -503,6 +511,7 @@ function processText(text) {
 function sendMessage() {
     var messageInput = document.getElementById('sendMessageInput');
     var messageBox = document.getElementById('messageBox');
+    const sendActionUtteranceInput = document.getElementById('sendActionUtteranceInput');
 
     // Check if the input box is empty
     if (messageInput.value.trim() === '') {
@@ -510,28 +519,25 @@ function sendMessage() {
     }
 
     // Get current time
-    var currentTime = new Date().toLocaleTimeString();
-
-    // Add message to the message box
-    messageBox.innerHTML += `
-        <div>${messageInput.value}</div>
-        <div class="timestamp">${currentTime}</div>
-        <hr>
-    `;
-
     // Scroll to the bottom of the message box
     messageBox.scrollTop = messageBox.scrollHeight;
 
     // Disable the send button again after sending
-    document.getElementById('sendButton').disabled = true;
+    document.getElementById('sendMessageButton').disabled = true;
     let message = {
         'ds_action_by_type': '',
-        'ds_action_by': '',
-        'message': '',
-        'ds_action': '',
+        'ds_action_by': 'Joe(patient)',
+        'message': messageInput.value,
+        'ds_action': 'USER_SENT_UTTERANCE',
+        'session_id': session_id,
+        'sender_agent_id': sender_agent_id,
+        'receiver_agent_id': receiver_agent_id
     }
     // Clear the input text box
+    messageInput.focus();
+    addMessageToMessageBox('Joe(patient)', messageInput.value);
     messageInput.value = '';
+    sendActionUtteranceInput.value = '';
     console.log(message);
 
     fetch(url, {
@@ -556,12 +562,12 @@ function sendMessage() {
 function sendAction() {
     const sendActionButton = document.getElementById('sendActionButton');
     const sendActionUtteranceInput = document.getElementById('sendActionUtteranceInput');
+    const sendMessageInput = document.getElementById('sendMessageInput');
 
     // if the filled in template include a square bracket [, then there exists some values yet to be filled in
 
-    sendActionButton.disabled = document.getElementById('chosenActionBox').innerHTML.toString().includes("[");
+    // sendActionButton.disabled = document.getElementById('chosenActionBox').innerHTML.toString().includes("[");
 
-    sendActionUtteranceInput.value = '';
     if (!sendActionButton.disabled) {
         let message = {
             'ds_action_by_type': '',
@@ -572,7 +578,10 @@ function sendAction() {
             'sender_agent_id': sender_agent_id,
             'receiver_agent_id': receiver_agent_id
         }
-
+        sendMessageInput.focus();
+        addMessageToMessageBox('Joe(patient)', sendMessageInput.value);
+        sendMessageInput.value = '';
+        sendActionUtteranceInput.value = '';
         fetch(url, {
             method: 'POST',
             mode: "cors",
@@ -594,20 +603,12 @@ function sendAction() {
     }
 }
 
-function checkEnter(event) {
-    var sendButton = document.getElementById('sendButton');
-    var messageInput = document.getElementById('sendMessageInput');
-
-    if (event.key === 'Enter' && !event.shiftKey) {
+$("#sendMessageInput").on("keypress", function (event) {
+    if (event.which === 13) {
         event.preventDefault();
-        // Check if the input box is empty
-        if (messageInput.value.trim() !== '') {
-            sendMessage();
-        }
+        sendMessage();
     }
-    // Toggle send button based on input
-    toggleSendButton();
-}
+});
 
 function selectOption(selectedOption, ds_action) {
     // Send the selected option to the server
@@ -668,7 +669,7 @@ function updateSuggestedActionUtterance() {
 
     // if the filled in template include a square bracket [, then there exists some values yet to be filled in
 
-    sendActionButton.disabled = document.getElementById('chosenActionBox').innerHTML.toString().includes("[");
+    // sendActionButton.disabled = document.getElementById('chosenActionBox').innerHTML.toString().includes("[");
 
     sendActionUtteranceInput.value = '';
     if (!sendActionButton.disabled) {
@@ -703,11 +704,15 @@ function updateSuggestedActionUtterance() {
     }
 }
 
-function updateSuggestedActionUtteranceByInput(){
-    const sendActionButton = document.getElementById('sendActionButton');
-    const sendActionUtteranceInput = document.getElementById('sendMessageInput');
+$('#sendMessageInput').on('input', function () {
+    updateSuggestedActionUtteranceByInput($(this).val());
+});
 
-    const inputText = sendActionUtteranceInput.value
+function updateSuggestedActionUtteranceByInput(inputText) {
+    // const sendActionButton = document.getElementById('sendActionButton');
+    const sendMessageInput = document.getElementById('sendMessageInput');
+    document.getElementById('sendMessageButton').disabled = sendMessageInput.value === '';
+    // const inputText = sendActionUtteranceInput.value
     let message = {
         'ds_action_by_type': '',
         'ds_action_by': 'Joe(patient)',
