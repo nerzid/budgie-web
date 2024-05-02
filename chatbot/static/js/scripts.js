@@ -178,6 +178,7 @@ $(document).ready(function () {
 
 function showSelectScenarioPanel() {
   const scenariosListInModal = $("#scenariosListInModal")[0];
+  scenariosListInModal.innerHTML = ''
   for (const [scenarioId, scenarioName] of Object.entries(
     scenarioIdsWithName
   )) {
