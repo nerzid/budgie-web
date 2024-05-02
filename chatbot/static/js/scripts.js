@@ -77,24 +77,7 @@ $(document).ready(function () {
 
   // document.getElementById('sendMessageInput').focus();
 
-  fetch(url, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    body: JSON.stringify({
-      ds_action: "INIT",
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log('Response from server:', data);
-    })
-    .catch((error) => {
-      console.error("Error sending message:", error);
-    });
+  sendMessageToApi("BUDGIE-WEB", "INIT", "");
 
   socket.on("stream_message", function (data) {
     // Append received messages to the message box
@@ -113,9 +96,12 @@ $(document).ready(function () {
       agentIdsWithName = data.message;
       showSelectAgentPanel();
     } else if (data.ds_action === "DIALOGUE_STARTED") {
-      session_id = data.session_id;
-      sender_agent_id = data.sender_agent_id;
-      receiver_agent_id = data.receiver_agent_id;
+      actionHistory.innerHTML += `
+      <div class="agent">${data.ds_action_by}</div>
+      <div>${message}</div>
+      <div class="timestamp">${currentTime}</div>
+      <hr>
+`;
     } else if (data.ds_action === "REQUEST_USER_CHOOSE_MENU_OPTION") {
       // // Check if there are options in the response
       // if (data.message && data.message.length > 0) {
@@ -180,6 +166,9 @@ $(document).ready(function () {
       data.ds_action === "SEND_UTTERANCE_BY_ACTION" ||
       data.ds_action === "REQUEST_UTTERANCE_BY_STRING_MATCH"
     ) {
+      
+    } else if (data.ds_action === "SEND_UTTERANCE_BY_STRING_MATCH") {
+      // addMessageToMessageBox(data.ds_action_by, message);
       document.getElementById("sendActionUtteranceInput").value = data.message;
     } else {
       addMessageToMessageBox(data.ds_action_by, message);
@@ -200,15 +189,16 @@ function showSelectScenarioPanel() {
 }
 
 function selectScenario(scenarioId) {
-    sendMesageToApi('USER_CHOSE_SCENARIO', {'scenario_id':scenarioId})
-    $("#scenarioSelectionModal").modal("hide");
+  sendMessageToApi("BUDGIE-WEB", "USER_CHOSE_SCENARIO", {
+    scenario_id: scenarioId,
+  });
+  $("#scenarioSelectionModal").modal("hide");
 }
 
 function showSelectAgentPanel() {
-    const agentsListInModal = $("#agentsListInModal")[0];
-  for (const [agentId, agentName] of Object.entries(
-    agentIdsWithName
-  )) {
+  const agentsListInModal = $("#agentsListInModal")[0];
+  agentsListInModal.innerHTML = ''
+  for (const [agentId, agentName] of Object.entries(agentIdsWithName)) {
     agentsListInModal.innerHTML += `
         <button type="button" onclick="selectAgent('${agentId}')" class="list-group-item list-group-item-action">${agentName}</button>
         `;
@@ -216,9 +206,11 @@ function showSelectAgentPanel() {
   $("#agentSelectionModal").modal("show");
 }
 
-function selectAgent(agentId){
-    sendMesageToApi('USER_CHOSE_AGENT', {'agent_id':agentId})
-    $("#agentSelectionModal").modal("hide");
+function selectAgent(agentId) {
+  sendMessageToApi("BUDGIE-WEB", "USER_CHOSE_AGENT", { agent_id: agentId });
+  sender_agent_id = agentId;
+  $("#agentSelectionModal").modal("hide");
+  document.getElementById("actingAs").innerHTML = agentIdsWithName[agentId]
 }
 
 function addMessageToMessageBox(messageBy, message) {
@@ -371,7 +363,7 @@ function showChosenActionTemplate(id) {
                                     </button>
                                     </div>`;
   const createdAction =
-    `<div id='${id}-block' class='box-border'>` +
+    `<div id='${id}-block' class='box-border flex-nowrap overflow-auto'>` +
     deleteButton +
     `<p>` +
     action["name"] +
@@ -613,39 +605,18 @@ function sendMessage() {
 
   // Disable the send button again after sending
   document.getElementById("sendMessageButton").disabled = true;
-  let message = {
-    ds_action_by_type: "",
-    ds_action_by: "Joe(patient)",
-    message: messageInput.value,
-    ds_action: "USER_SENT_UTTERANCE",
-    session_id: session_id,
-    sender_agent_id: sender_agent_id,
-    receiver_agent_id: receiver_agent_id,
-  };
+
+  sendMessageToApi("AGENT", "USER_SENT_UTTERANCE", messageInput.value);
   // Clear the input text box
   messageInput.focus();
-  addMessageToMessageBox("Joe(patient)", messageInput.value);
+  addMessageToMessageBox(getAgentNameById(sender_agent_id), messageInput.value);
   messageInput.value = "";
   sendActionUtteranceInput.value = "";
-  console.log(message);
-
-  fetch(url, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    body: JSON.stringify(message),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Response from server:", data);
-    })
-    .catch((error) => {
-      console.error("Error sending message:", error);
-    });
   // messageInput.focus();
+}
+
+function getAgentNameById(agentId){
+  return agentIdsWithName[agentId]
 }
 
 function sendAction() {
@@ -660,35 +631,15 @@ function sendAction() {
   // sendActionButton.disabled = document.getElementById('chosenActionBox').innerHTML.toString().includes("[");
 
   if (!sendActionButton.disabled) {
-    let message = {
-      ds_action_by_type: "",
-      ds_action_by: "Joe(patient)",
-      message: Object.values(chosen_actions),
-      ds_action: "USER_CHOSE_ACTIONS",
-      session_id: session_id,
-      sender_agent_id: sender_agent_id,
-      receiver_agent_id: receiver_agent_id,
-    };
     sendMessageInput.focus();
-    addMessageToMessageBox("Joe(patient)", sendMessageInput.value);
+    addMessageToMessageBox(getAgentNameById(sender_agent_id), sendMessageInput.value);
     sendMessageInput.value = "";
     sendActionUtteranceInput.value = "";
-    fetch(url, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify(message),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Response from server:", data);
-      })
-      .catch((error) => {
-        console.error("Error sending message:", error);
-      });
+    sendMessageToApi(
+      "AGENT",
+      "USER_CHOSE_ACTIONS",
+      JSON.stringify(Object.values(chosen_actions))
+    );
   } else {
     sendActionUtteranceInput.value = "";
   }
@@ -703,32 +654,8 @@ $("#sendMessageInput").on("keypress", function (event) {
 
 function selectOption(selectedOption, ds_action) {
   // Send the selected option to the server
-  let message = {
-    ds_action_by_type: "",
-    ds_action_by: "Joe(patient)",
-    message: selectedOption,
-    ds_action: ds_action,
-    session_id: session_id,
-    sender_agent_id: sender_agent_id,
-    receiver_agent_id: receiver_agent_id,
-  };
   $("#select-menu-option").remove();
-  fetch(url, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    },
-    body: JSON.stringify(message),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      // console.log('Response from server:', data);
-    })
-    .catch((error) => {
-      console.error("Error sending message:", error);
-    });
+  sendMessageToApi("AGENT", ds_action, JSON.stringify(selectedOption));
 }
 
 function displayOptions(options, ds_action) {
@@ -766,32 +693,11 @@ function updateSuggestedActionUtterance() {
 
   sendActionUtteranceInput.value = "";
   if (!sendActionButton.disabled) {
-    let message = {
-      ds_action_by_type: "",
-      ds_action_by: "Joe(patient)",
-      message: Object.values(chosen_actions),
-      ds_action: "REQUEST_UTTERANCE_BY_ACTION",
-      session_id: session_id,
-      sender_agent_id: sender_agent_id,
-      receiver_agent_id: receiver_agent_id,
-    };
-
-    fetch(url, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: JSON.stringify(message),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Response from server:", data);
-      })
-      .catch((error) => {
-        console.error("Error sending message:", error);
-      });
+    sendMessageToApi(
+      "AGENT",
+      REQUEST_UTTERANCE_BY_ACTION,
+      JSON.stringify(Object.values(chosen_actions))
+    );
   } else {
     sendActionUtteranceInput.value = "";
   }
@@ -804,17 +710,21 @@ $("#sendMessageInput").on("input", function () {
 function updateSuggestedActionUtteranceByInput(inputText) {
   // const sendActionButton = document.getElementById('sendActionButton');
   const sendMessageInput = document.getElementById("sendMessageInput");
-  document.getElementById("sendMessageButton").disabled =
-    sendMessageInput.value === "";
-  // const inputText = sendActionUtteranceInput.value
-  let message = {
-    ds_action_by_type: "",
-    ds_action_by: "Joe(patient)",
-    message: inputText,
-    ds_action: "REQUEST_UTTERANCE_BY_STRING_MATCH",
+  document.getElementById("sendMessageButton").disabled = sendMessageInput.value === "";
+  sendMessageToApi(
+    "AGENT",
+    "REQUEST_UTTERANCE_BY_STRING_MATCH",
+    JSON.stringify(inputText)
+  );
+}
+
+function sendMessageToApi(ds_action_by_type, dsAction, message) {
+  let data = {
+    ds_action_by_type: ds_action_by_type,
+    ds_action_by: sender_agent_id,
+    ds_action: dsAction,
     session_id: session_id,
-    sender_agent_id: sender_agent_id,
-    receiver_agent_id: receiver_agent_id,
+    message: message,
   };
 
   fetch(url, {
@@ -824,7 +734,7 @@ function updateSuggestedActionUtteranceByInput(inputText) {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
     },
-    body: JSON.stringify(message),
+    body: JSON.stringify(data),
   })
     .then((response) => response.json())
     .then((data) => {
@@ -833,31 +743,4 @@ function updateSuggestedActionUtteranceByInput(inputText) {
     .catch((error) => {
       console.error("Error sending message:", error);
     });
-}
-
-function sendMesageToApi(dsAction, message) {
-    let data = {
-        ds_action_by_type: "AGENT",
-        ds_action_by: sender_agent_id,
-        message: message,
-        ds_action: dsAction,
-        session_id: session_id,
-      };
-
-    fetch(url, {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Response from server:", data);
-        })
-        .catch((error) => {
-          console.error("Error sending message:", error);
-        });
 }
