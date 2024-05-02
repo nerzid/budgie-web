@@ -1,10 +1,11 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="shortcut icon" type="image/png" href="{% static 'img/budgie_256.png' %}"/>
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/budgie_256.png' %}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
@@ -13,149 +14,176 @@
     <link rel="stylesheet" href="{% static 'css/beautiful.css' %}">
     <title>Chatbot Interface</title>
 </head>
+
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Navigation Bar -->
-        <div class="col-2 col-menu">
-            <nav class="navbar navbar-dark">
-                <ul class="navbar-nav">
-                    <li class="nav-item rounded-lg"><a href="#" class="nav-link">Chatbot</a></li>
-                    <li class="nav-item rounded-lg"><a href="#" class="nav-link">Knowledgebase</a></li>
-                    <li class="nav-item rounded-lg"><a href="#" class="nav-link">Competences</a></li>
-                    {#                    <li class="nav-item"><a href="#" class="nav-link">Sessions</a></li>#}
-                    {#                    <li class="nav-item"><a href="#" class="nav-link">Dialogue History</a></li>#}
-                    {#                    <li class="nav-item"><a href="#" class="nav-link">Agents Info</a></li>#}
-                </ul>
-            </nav>
-        </div>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Navigation Bar -->
+            <div class="col-2 col-menu">
+                <nav class="navbar navbar-dark">
+                    <ul class="navbar-nav">
+                        <li class="nav-item rounded-lg"><a href="#" class="nav-link">Chatbot</a></li>
+                        <li class="nav-item rounded-lg"><a href="#" class="nav-link">Knowledgebase</a></li>
+                        <li class="nav-item rounded-lg"><a href="#" class="nav-link">Competences</a></li>
+                        {# <li class="nav-item"><a href="#" class="nav-link">Sessions</a></li>#}
+                        {# <li class="nav-item"><a href="#" class="nav-link">Dialogue History</a></li>#}
+                        {# <li class="nav-item"><a href="#" class="nav-link">Agents Info</a></li>#}
+                    </ul>
+                </nav>
+            </div>
 
-        <!-- Messaging Interface Column -->
-        <div class="col-6 col-messaging">
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
+            <!-- Messaging Interface Column -->
+            <div class="col-6 col-messaging">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home"
                             type="button" role="tab" aria-controls="home" aria-selected="true">Chat
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
                             type="button" role="tab" aria-controls="profile" aria-selected="false">Sessions
-                    </button>
-                </li>
-            </ul>
-            <div class="tab-content" id="myTabContent">
-                <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                    <div class="message-box-wrapper">
-                        <div class="message-box" id="messageBox"></div>
-                        <div id="chosenActionBox" class="box-border">
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="message-box-wrapper">
+                            <div class="message-box" id="messageBox"></div>
+                            <div id="chosenActionBox" class="box-border">
 
-                        </div>
-                        <div id="actionsBox" class="input-group">
+                            </div>
+                            <div id="actionsBox" class="input-group">
 
-                        </div>
-                        <div class="btn-group dropup">
-                            <button type="button" class="btn btn-outline-dark dropdown-toggle"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                Add new action
-                            </button>
-                            <ul id="actions-list" class="dropdown-menu">
-                            </ul>
-                        </div>
-                        <div class="input-group">
-                            <input type="text" id="sendActionUtteranceInput" class="form-control send-message-input"
-                                   placeholder="Matching utterance will be shown here"
-                                   disabled>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-dark send-message-button" id="sendActionButton"
+                            </div>
+                            <div class="btn-group dropup">
+                                <button type="button" class="btn btn-outline-dark dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    Add new action
+                                </button>
+                                <ul id="actions-list" class="dropdown-menu">
+                                </ul>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="sendActionUtteranceInput" class="form-control send-message-input"
+                                    placeholder="Matching utterance will be shown here" disabled>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-dark send-message-button" id="sendActionButton"
                                         onclick="sendAction()">
-                                    <i class="fas fa-arrow-up"></i>
-                                </button>
+                                        <i class="fas fa-arrow-up"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="sendMessageInput" class="form-control send-message-input"
+                                    placeholder="Type to search for an utterance here">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-dark send-message-button" id="sendMessageButton"
+                                        onclick="sendMessage()" disabled>
+                                        <i class="fas fa-arrow-up"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="input-group">
-                            <input type="text" id="sendMessageInput" class="form-control send-message-input"
-                                   placeholder="Type to search for an utterance here">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-dark send-message-button" id="sendMessageButton"
-                                        onclick="sendMessage()"
-                                        disabled>
-                                    <i class="fas fa-arrow-up"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        {#                        <div class="input-group">#}
-                        {#                            <input type="text" id="sendMessageInput" class="form-control send-message-input"#}
-                        {#                                   placeholder="Type your message..." onkeyup="checkEnter(event)"#}
-                        {#                                   oninput="toggleSendButton()">#}
-                        {#                            <div class="input-group-append">#}
-                        {#                                <button class="btn btn-outline-dark send-message-button" id="sendButton"#}
-                        {#                                        onclick="sendMessage()"#}
-                        {#                                        disabled>#}
-                        {#                                    <i class="fas fa-arrow-up"></i>#}
-                        {#                                </button>#}
-                        {#                            </div>#}
-                        {#                        </div>#}
                     </div>
-                </div>
-                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                    <div class="wrapper">
-                        <div class="col-right">
-                            <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
-                                <div class="btn-export" onclick="Swal.fire({ title: 'Export',
+                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <div class="wrapper">
+                            <div class="col-right">
+                                <div id="drawflow" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <div class="btn-export" onclick="Swal.fire({ title: 'Export',
                                 html: '<pre><code>'+JSON.stringify(editor.export(), null,4)+'</code></pre>'
                                 })">Export
-                                </div>
-                                <div class="btn-clear" onclick="editor.clearModuleSelected()">Clear</div>
-                                <div class="btn-lock">
-                                    <i id="lock" class="fas fa-lock"
-                                       onclick="editor.editor_mode='fixed'; changeMode('lock');"></i>
-                                    <i id="unlock" class="fas fa-lock-open"
-                                       onclick="editor.editor_mode='edit'; changeMode('unlock');"
-                                       style="display:none;"></i>
-                                </div>
-                                <div class="bar-zoom">
-                                    <i class="fas fa-search-minus" onclick="editor.zoom_out()"></i>
-                                    <i class="fas fa-search" onclick="editor.zoom_reset()"></i>
-                                    <i class="fas fa-search-plus" onclick="editor.zoom_in()"></i>
+                                    </div>
+                                    <div class="btn-clear" onclick="editor.clearModuleSelected()">Clear</div>
+                                    <div class="btn-lock">
+                                        <i id="lock" class="fas fa-lock"
+                                            onclick="editor.editor_mode='fixed'; changeMode('lock');"></i>
+                                        <i id="unlock" class="fas fa-lock-open"
+                                            onclick="editor.editor_mode='edit'; changeMode('unlock');"
+                                            style="display:none;"></i>
+                                    </div>
+                                    <div class="bar-zoom">
+                                        <i class="fas fa-search-minus" onclick="editor.zoom_out()"></i>
+                                        <i class="fas fa-search" onclick="editor.zoom_reset()"></i>
+                                        <i class="fas fa-search-plus" onclick="editor.zoom_in()"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Empty Column -->
-        <div class="col-4">
-            <div class="message-box-wrapper">
-                <div class="message-box" id="action-history">
-                    <!-- Messages will be displayed here -->
+            <!-- Empty Column -->
+            <div class="col-4">
+                <div class="message-box-wrapper">
+                    <div class="message-box" id="action-history">
+                        <!-- Messages will be displayed here -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    <div class="modal fade" id="scenarioSelectionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Choose a scenario</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="scenariosListInModal" class="list-group">
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="agentSelectionModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Choose an agent to act as</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="agentsListInModal" class="list-group">
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
-<!-- Bootstrap JS and Popper.js (required for Bootstrap) -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    <!-- Bootstrap JS and Popper.js (required for Bootstrap) -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-<script src="{% static 'js/loading-bar.js' %}"></script>
-<script src="{% static 'js/drawflow.min.js' %}"></script>
+    <script src="{% static 'js/loading-bar.js' %}"></script>
+    <script src="{% static 'js/drawflow.min.js' %}"></script>
 
 
-{# for some reason the below code doesn't work if I use module instead of /module #}
-<script src="{% static 'js/settings.js' %}"></script>
-<script src="{% static 'js/scripts.js' %}"></script>
+    {# for some reason the below code doesn't work if I use module instead of /module #}
+    <script src="{% static 'js/settings.js' %}"></script>
+    <script src="{% static 'js/scripts.js' %}"></script>
 
-<!-- Font Awesome -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 </body>
+
 </html>

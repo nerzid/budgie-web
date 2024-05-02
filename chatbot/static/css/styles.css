@@ -151,3 +151,7 @@ dl, ol, ul {
   overflow-y: auto;
   max-height: 300px;
 }
+
+.modal-backdrop {
+    z-index: -1;
+  }
