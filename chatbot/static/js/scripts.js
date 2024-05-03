@@ -32,8 +32,10 @@ let session_id = -1;
 let sender_agent_id = -1;
 let receiver_agent_id = -1;
 
-scenarioIdsWithName = {};
-agentIdsWithName = {};
+let scenarioIdsWithName = {};
+let agentIdsWithName = {};
+
+let isDialogueStarted = false;
 
 var id = document.getElementById("drawflow");
 const editor = new Drawflow(id);
@@ -96,6 +98,7 @@ $(document).ready(function () {
       agentIdsWithName = data.message;
       showSelectAgentPanel();
     } else if (data.ds_action === "DIALOGUE_STARTED") {
+      isDialogueStarted = true;
       actionHistory.innerHTML += `
       <div class="agent">${data.ds_action_by}</div>
       <div>${message}</div>
@@ -194,6 +197,7 @@ function selectScenario(scenarioId) {
     scenario_id: scenarioId,
   });
   $("#scenarioSelectionModal").modal("hide");
+  isDialogueStarted = false;
 }
 
 function showSelectAgentPanel() {
@@ -212,6 +216,10 @@ function selectAgent(agentId) {
   sender_agent_id = agentId;
   $("#agentSelectionModal").modal("hide");
   document.getElementById("actingAs").innerHTML = agentIdsWithName[agentId]
+  console.log(isDialogueStarted);
+  if(isDialogueStarted == false){
+    sendMessageToApi("BUDGIE-WEB", "START_DIALOGUE", {})
+  }
 }
 
 function addMessageToMessageBox(messageBy, message) {
