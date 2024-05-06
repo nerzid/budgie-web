@@ -169,7 +169,10 @@ $(document).ready(function () {
       data.ds_action === "SEND_UTTERANCE_BY_ACTION" ||
       data.ds_action === "REQUEST_UTTERANCE_BY_STRING_MATCH"
     ) {
-      
+      const sendActionUtteranceInput = document.getElementById(
+        "sendActionUtteranceInput"
+      );
+      sendActionUtteranceInput.value = data.message;
     } else if (data.ds_action === "SEND_UTTERANCE_BY_STRING_MATCH") {
       // addMessageToMessageBox(data.ds_action_by, message);
       document.getElementById("sendActionUtteranceInput").value = data.message;
@@ -346,11 +349,13 @@ function showChosenActionTemplate(id) {
         paramValue.forEach((action_name) => {
           actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}','${paramName}', '${paramType}', '${action_name}')">${action_name}</a></li>`;
         });
-      } else if (paramType === "Effect") {
-        actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}','${paramName}', '${paramType}', '${encodeURIComponent(
-          JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE")
-        )}')">${paramValue}</a></li>`;
-      } else {
+      } 
+      // else if (paramType === "Effect") {
+      //   actionsBoxInnerHtml += `<li><a class='dropdown-item' href='#' onclick="createNewParameterBlock('${id}','${paramName}', '${paramType}', '${encodeURIComponent(
+      //     JSON.stringify(paramEntry).replaceAll("'", "TMPQUOTE")
+      //   )}')">${paramValue}</a></li>`;
+      // } 
+      else {
         let escaped_attr = paramValue;
         if (paramValue != null) {
           if (typeof paramValue === "string") {
@@ -372,7 +377,7 @@ function showChosenActionTemplate(id) {
                                     </button>
                                     </div>`;
   const createdAction =
-    `<div id='${id}-block' class='box-border flex-nowrap overflow-auto'>` +
+    `<div id='${id}-block' class='box-border flex-nowrap'>` +
     deleteButton +
     `<p>` +
     action["name"] +
@@ -634,14 +639,18 @@ function sendAction() {
     "sendActionUtteranceInput"
   );
   const sendMessageInput = document.getElementById("sendMessageInput");
+ 
 
   // if the filled in template include a square bracket [, then there exists some values yet to be filled in
 
   // sendActionButton.disabled = document.getElementById('chosenActionBox').innerHTML.toString().includes("[");
 
+
   if (!sendActionButton.disabled) {
     sendMessageInput.focus();
-    addMessageToMessageBox(getAgentNameById(sender_agent_id), sendMessageInput.value);
+    if(!sendActionUtteranceInput.value.startsWith('[')){
+      addMessageToMessageBox(getAgentNameById(sender_agent_id), sendActionUtteranceInput.value);
+    }
     sendMessageInput.value = "";
     sendActionUtteranceInput.value = "";
     sendMessageToApi(
@@ -704,7 +713,7 @@ function updateSuggestedActionUtterance() {
   if (!sendActionButton.disabled) {
     sendMessageToApi(
       "AGENT",
-      REQUEST_UTTERANCE_BY_ACTION,
+      "REQUEST_UTTERANCE_BY_ACTION",
       JSON.stringify(Object.values(chosen_actions))
     );
   } else {
@@ -715,6 +724,8 @@ function updateSuggestedActionUtterance() {
 $("#sendMessageInput").on("input", function () {
   updateSuggestedActionUtteranceByInput($(this).val());
 });
+
+
 
 function updateSuggestedActionUtteranceByInput(inputText) {
   // const sendActionButton = document.getElementById('sendActionButton');
