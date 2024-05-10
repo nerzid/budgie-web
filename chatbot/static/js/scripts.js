@@ -223,9 +223,12 @@ function selectAgent(agentId) {
   if(isDialogueStarted == false){
     sendMessageToApi("BUDGIE-WEB", "START_DIALOGUE", {})
   }
+  updateSuggestedActionUtteranceByInput(''); // for DO NOTHING suggested utterance
 }
 
 function addMessageToMessageBox(messageBy, message) {
+  if (message === "Does nothing")
+    message = '<i>' + message + '</i>';
   const messageBox = document.getElementById("messageBox");
   var currentTime = new Date().toLocaleTimeString();
   messageBox.innerHTML += `
@@ -661,6 +664,7 @@ function sendAction() {
   } else {
     sendActionUtteranceInput.value = "";
   }
+  updateSuggestedActionUtteranceByInput(''); // for DO NOTHING suggested utterance
 }
 
 $("#sendMessageInput").on("keypress", function (event) {
