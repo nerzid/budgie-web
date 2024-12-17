@@ -4,12 +4,19 @@
 
 ## Table of Contents
 
+- [Quick Look](#quicklook)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [Contact](#contact)
+
+---
+
+## Quick Look
+
+![docs/images/budgie-web.png](docs/images/budgie-web.png)
 
 ---
 
